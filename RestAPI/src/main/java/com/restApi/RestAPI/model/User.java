@@ -1,22 +1,28 @@
 package com.restApi.RestAPI.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
-@Entity // Marks this class as a JPA entity (linked to a database table)
+import java.util.List;
+
+@Entity
 @Table(name = "users")
 public class User {
-
-    @Id // Marks this field as the primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates ID values
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name; // Automatically maps to a 'name' column in the database
+    private String name;
+
+    // One user can have many jobs
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Jobs> jobs;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Card card;
 
     // Getters and Setters
+    public User() {}
+
     public Long getId() {
         return id;
     }
@@ -31,5 +37,21 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<Jobs> getJobs() {
+        return jobs;
+    }
+
+    public Card getCard() {
+        return card;
+    }
+
+    public void setCard(Card card) {
+        this.card = card;
+    }
+
+    public void setJobs(List<Jobs> jobs) {
+        this.jobs = jobs;
     }
 }
