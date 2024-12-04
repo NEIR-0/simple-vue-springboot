@@ -1,9 +1,9 @@
 package com.restApi.RestAPI.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Table(name = "card")
@@ -15,8 +15,9 @@ public class Card {
     private String cardNumber;
     private LocalDate joinDate;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")  // Menyimpan FK ke User
+    @JsonIgnore
     private User user;
 
     // Constructor, Getter, Setter

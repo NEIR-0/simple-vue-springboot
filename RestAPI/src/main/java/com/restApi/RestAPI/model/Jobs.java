@@ -1,5 +1,6 @@
 package com.restApi.RestAPI.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -13,8 +14,9 @@ public class Jobs {
     private Double salary;
 
     // Many jobs can belong to one user
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     // Getters and Setters
