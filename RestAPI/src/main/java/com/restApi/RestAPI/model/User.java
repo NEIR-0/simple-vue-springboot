@@ -1,11 +1,13 @@
 package com.restApi.RestAPI.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.List;
 
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"jobs", "card"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

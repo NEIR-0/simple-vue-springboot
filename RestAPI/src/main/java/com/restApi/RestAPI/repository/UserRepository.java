@@ -11,6 +11,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u ORDER BY LOWER(u.name) DESC")
     List<User> findAllUsersSortedByName();
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.jobs")
-    List<User> findAllWithJobs();
+    @Query("SELECT u FROM User u")
+    @EntityGraph(attributePaths = {"jobs", "card"})
+    List<User> findAllWithJobsAndCard();
 }

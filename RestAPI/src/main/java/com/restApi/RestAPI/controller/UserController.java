@@ -29,21 +29,17 @@ public class UserController {
     @Transactional
     public List<User> getAllUsersCustomSorted() {
         // return userRepository.findAll(); // basic
-        //  return userRepository.findAllUsersSortedByName(); // manual menggunakan repository
+        // return userRepository.findAllUsersSortedByName(); // manual menggunakan repository
         return userRepository.findAll(Sort.by(Sort.Direction.DESC, "name")); // ini pakai bawaan jpa
     }
 
     @GetMapping("/with-jobs")
     public List<UserDTO> getAllUsers() {
+        //  logger
         Logger logger = LoggerFactory.getLogger(getClass());
 
-        // Memanggil method repository untuk mendapatkan list users
-        List<User> users = userRepository.findAllWithJobs();
-
-        // Melakukan logging untuk melihat isi dari users
+        List<User> users = userRepository.findAllWithJobsAndCard();
         logger.info("Isi users: {}", users);
-
-        // Logging lebih detail untuk melihat properties dari user jika perlu
         users.forEach(user -> logger.info("User ID: {}, Name: {}, Jobs: {}",
                 user.getId(), user.getName(), user.getJobs().size()));
 
