@@ -37,8 +37,8 @@ public class authController {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody Users inputUser) {
         String loginResult = userService.findByEmail(inputUser);
-        if ("Login berhasil".equals(loginResult)) {
-            return ResponseEntity.ok("Login berhasil");
+        if (loginResult.startsWith("Bearer ")) {
+            return ResponseEntity.ok(loginResult);
         } else {
             return ResponseEntity.badRequest().body(loginResult);
 

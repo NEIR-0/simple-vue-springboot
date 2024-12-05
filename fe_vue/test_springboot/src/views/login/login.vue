@@ -28,8 +28,7 @@ export default {
           password: this.password
         })
         
-        console.log(data, "!@#>!@>#!>@");
-        
+        localStorage.setItem('token', data); 
 
         this.email = ''
         this.password = ''

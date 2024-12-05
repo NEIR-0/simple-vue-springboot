@@ -1,5 +1,6 @@
 package com.restApi.RestAPI.services;
 
+import com.restApi.RestAPI.config.JwtUtil;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public List<Users> getAllUsers() {
         return userRepository.findAll();
@@ -49,7 +53,7 @@ public class UserService {
         if(matchingUser.isPresent()){
             Users dataUser = matchingUser.get();
             if(passwordEncoder.matches(inputUser.getPassword(), dataUser.getPassword())){
-                return "Login berhasil";
+                return ("Bearer " + jwtUtil.generateToken(inputUser.getEmail(), inputUser.getId()));
             } else {
                 return "email / password invalid";
             }
