@@ -1,7 +1,8 @@
 #BE:
 1. pakai intellij IDEA
 2. cuman di file main bisa play button nya kayak di flutter
-3. application.properties benerin,
- 
+3. pakai spring boot be nya
+4. application.properties benerin,
+
 #FE:
 pakai vscode
