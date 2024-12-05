@@ -1,24 +1,54 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from './views/Home.vue'
-import Form from './views/form.vue'
-import Update from './views/Update.vue'
+import About from './views/about/about.vue'
+import Homepage from './views/Homepage.vue'
+import Dashboard from './views/dashboard/Dashboard.vue'
+import Login from './views/login/login.vue'
+import Register from './views/login/Register.vue'
+
+const auth = (to, from, next) => {
+  const token = localStorage.getItem('token');
+  console.log(token, "!@>#>!@#>!");
+  
+  if (token) {
+    next();
+  } else {
+    next('/login');
+  }
+}
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: Homepage
   },
   {
-    path: '/form',
-    name: 'Form',
-    component: Form
+    path: '/register',
+    name: 'Register',
+    component: Register
   },
   {
-    path: '/update/:id',
-    name: 'Update',
-    component: Update
-  }
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboardLayout',
+    // beforeEnter: auth, 
+    children: [
+      {
+        path: '',
+        name: 'dashboard',
+        component: Dashboard
+      },
+      {
+        path: 'about',
+        name: 'about',
+        component: About
+      }
+    ]
+  },
 ]
 
 const router = createRouter({
