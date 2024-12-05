@@ -7,8 +7,6 @@ import Register from './views/login/Register.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
-  console.log(token, "!@>#>!@#>!");
-  
   if (token) {
     next();
   } else {
@@ -35,7 +33,7 @@ const routes = [
   {
     path: '/dashboard',
     name: 'dashboardLayout',
-    // beforeEnter: auth, 
+    beforeEnter: auth, 
     children: [
       {
         path: '',
