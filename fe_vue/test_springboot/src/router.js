@@ -4,6 +4,7 @@ import Homepage from './views/Homepage.vue'
 import Dashboard from './views/dashboard/Dashboard.vue'
 import Login from './views/login/login.vue'
 import Register from './views/login/Register.vue'
+import WildCard from './views/WildCard.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
@@ -47,6 +48,13 @@ const routes = [
       }
     ]
   },
+
+   // Wildcard untuk 404
+   {
+    path: '/:pathMatch(.*)*', // Ini menangkap semua route yang tidak terdefinisi
+    name: 'NotFound',
+    component: WildCard // Komponen untuk halaman 404
+  }
 ]
 
 const router = createRouter({
