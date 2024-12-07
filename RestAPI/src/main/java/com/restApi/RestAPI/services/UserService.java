@@ -25,11 +25,18 @@ public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public List<UserDTO> getAllUsers(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);  // Mengatur halaman dan ukuran
-        Page<Users> usersPage = userRepository.findAll(pageRequest);
-        // return usersPage.getContent();
-        return usersPage.getContent().stream()
+    public List<UserDTO> getAllUsers(int page, int size, String search) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        Page<Users> usersPage;
+        if (search != null && !search.isEmpty()) {
+            usersPage = userRepository.findByEmailContainingIgnoreCase(search, pageRequest);
+        } else {
+            usersPage = userRepository.findAll(pageRequest);
+        }
+
+        return usersPage.getContent()
+                .stream()
                 .map(user -> new UserDTO(user.getId(), user.getEmail()))
                 .collect(Collectors.toList());
     }

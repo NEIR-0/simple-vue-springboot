@@ -1,6 +1,15 @@
 <template>
     <div class="h-screen flex flex-col items-center justify-center bg-red-300">
       <h1>About</h1>
+      <!-- search -->
+      <input
+        type="text"
+        v-model="searchQuery"
+        @input="onSearch"
+        placeholder="Search by email..."
+        class="mb-4 px-4 py-2 border rounded"
+      />
+
       <!-- Users Table -->
       <div v-if="users.length > 0" class="w-full max-w-md mx-auto bg-white rounded shadow-md">
         <table class="table-auto w-full text-left border-collapse">
@@ -29,7 +38,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
 
 export default {
   data() {
@@ -37,54 +46,46 @@ export default {
       users: [],
       currentPage: 0,
       totalPages: 0,
-      pageSize: 10,  // Default page size is 10
-    }
+      pageSize: 10,
+      searchQuery: '',
+    };
   },
   methods: {
-    // Function to fetch users based on the current page and size
-    async fetchUsers() {
-      console.log(this.currentPage, ">>>>>>");
+    async fetchUsers(query = '') {
       const BearerToken = localStorage.getItem('token');
       try {
         const { data } = await axios.get('http://localhost:8081/users', {
           params: {
             page: this.currentPage,
             size: this.pageSize,
+            search: query,
           },
           headers: {
             'Content-Type': 'application/json',
-            "Authorization": BearerToken
+            Authorization: BearerToken,
           },
         });
-        console.log(data, "@>#>!@>#12");
-        console.log(data?.length, "@>#>!@>#12");
-        
-        // Update users and pagination details
         this.users = data;
-        // Set total pages based on the total number of users
         this.totalPages = Math.ceil(data.length / this.pageSize);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     },
-    
-    // Change the page when Next/Previous buttons are clicked
     prevPage(page) {
-      console.log("click?");
-      console.log(page);
       this.currentPage = page;
-      this.fetchUsers();  // Re-fetch data for the new page
+      this.fetchUsers(this.searchQuery);
     },
-
     nextPage(page) {
-      console.log("click?");
-      console.log(page);
       this.currentPage = page;
-      this.fetchUsers();  // Re-fetch data for the new page
+      this.fetchUsers(this.searchQuery);
+    },
+    onSearch() {
+      this.currentPage = 0;
+      this.fetchUsers(this.searchQuery);
     },
   },
   mounted() {
-    this.fetchUsers();  // Fetch users when component is mounted
+    this.fetchUsers();
   },
-}
+};
 </script>

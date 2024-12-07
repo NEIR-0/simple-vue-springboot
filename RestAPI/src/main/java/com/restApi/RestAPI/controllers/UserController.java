@@ -16,9 +16,10 @@ public class UserController {
 
     @GetMapping
     public List<UserDTO> getAllUsers(
-            @RequestParam(value = "page", defaultValue = "0") Integer page, // ingat ini endpoint jadi request params
-            @RequestParam(value = "size", defaultValue = "10") Integer size // ingat ini endpoint jadi request params
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size,
+            @RequestParam(value = "search", required = false) String search
     ) {
-        return userService.getAllUsers(page, size);
+        return userService.getAllUsers(page, size, search);
     }
 }
