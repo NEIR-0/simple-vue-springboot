@@ -21,6 +21,8 @@
 
 <script>
 import abi from "../../../abi/sendEther.js";
+import abiDeploy from "../../../abi/SimpleSendEtherTestSepolia.js";
+
 import { ethers } from "ethers";
 
 export default {
@@ -43,13 +45,21 @@ export default {
             .VITE_ADDRESS_CONTACT_SIMPLESENDERETHER;
           // console.log(contractAddress, "????");
 
+          // local
           const smartContract = new ethers.Contract(contractAddress, abi, sig); 
-          // console.log(smartContract);
-
+          console.log("smartContract Local: ", smartContract);
           const tx = await smartContract.sendEther(this.address, {
             value: ethers.utils.parseEther(String(this.nominal)),
           });
 
+          // deploy
+          // const smartContract = new ethers.Contract(contractAddress, abiDeploy, sig);
+          // console.log("smartContract Deploy: ", smartContract);
+          // const tx = await smartContract.sendSepoliaTestnet(this.address, {
+          //   value: ethers.utils.parseEther(String(this.nominal)),
+          // });
+
+          console.log("Tx: ", tx, "????");
           console.log("Transaction Hash: ", tx.hash);
           await tx.wait();
         } else {
