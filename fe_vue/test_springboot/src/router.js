@@ -5,6 +5,7 @@ import Dashboard from './views/dashboard/Dashboard.vue'
 import Login from './views/login/login.vue'
 import Register from './views/login/Register.vue'
 import WildCard from './views/WildCard.vue'
+import Wallet from './views/wallet/wallet.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
@@ -45,6 +46,11 @@ const routes = [
         path: 'about',
         name: 'about',
         component: About
+      },
+      {
+        path: 'wallet',
+        name: 'wallet',
+        component: Wallet
       }
     ]
   },
