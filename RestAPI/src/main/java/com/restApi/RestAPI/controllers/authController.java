@@ -1,4 +1,5 @@
 package com.restApi.RestAPI.controllers;
+
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.services.UserService;
 import jakarta.validation.Valid;
@@ -7,18 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/auth")
 public class authController {
     @Autowired
     private UserService userService;
-
-    @GetMapping
-    public List<Users> getAllUsers() {
-        return userService.getAllUsers();
-    }
 
     @PostMapping("/register")
     public ResponseEntity<String> createUser(@Valid @RequestBody Users inputUser, BindingResult result) {
