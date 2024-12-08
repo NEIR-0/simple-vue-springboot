@@ -6,6 +6,7 @@ import Login from './views/login/login.vue'
 import Register from './views/login/Register.vue'
 import WildCard from './views/WildCard.vue'
 import Wallet from './views/wallet/wallet.vue'
+import MessageComponent from './views/msgTest/MessageComponent.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
@@ -31,6 +32,11 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login
+  },
+  {
+    path: '/testmsg',
+    name: 'testmsg',
+    component: MessageComponent
   },
   {
     path: '/dashboard',
