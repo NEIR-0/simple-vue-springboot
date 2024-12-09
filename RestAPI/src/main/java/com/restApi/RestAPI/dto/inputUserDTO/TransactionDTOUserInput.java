@@ -1,16 +1,15 @@
-package com.restApi.RestAPI.dto;
+package com.restApi.RestAPI.dto.inputUserDTO;
 
 import java.util.Date;
 
-public class TransactionDTO {
+public class TransactionDTOUserInput {
     private Long userId;
     private String des;
     private Float price;
     private String hash;
     private String status;
     private Long receiverId;
-    private Date createdAt;
-    private Date updatedAt;
+    private Long transactionId;
 
     // Getters and Setters
     public Long getUserId() {
@@ -59,5 +58,13 @@ public class TransactionDTO {
 
     public void setReceiverId(Long receiverId) {
         this.receiverId = receiverId;
+    }
+
+    public Long getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
     }
 }
