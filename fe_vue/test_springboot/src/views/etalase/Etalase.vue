@@ -12,6 +12,10 @@
           </div>
         </div>
       </div>
+
+      <ul v-if="transactions?.length > 0" class="mt-10">
+        <li v-for="transaction in transactions">{{transaction?.id}} {{transaction?.status}}</li>
+      </ul>
     </div>
 </template>
 
@@ -19,10 +23,12 @@
 import axios from 'axios';
 import abi from "../../../abi/TransactionStorage.js";
 import { ethers } from "ethers";
+import WebSocketService from '../../services/WebSocketService';
 
 export default {
   data() {
     return {
+      transactions: [],
       products: [],
       currentPage: 0,
       totalPages: 0,
@@ -31,6 +37,21 @@ export default {
     };
   },
   methods: {
+    async fetchTransactions() {
+      const BearerToken = localStorage.getItem('token');
+      try {
+        const { data } = await axios.get('http://localhost:8081/transaction', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: BearerToken,
+          },
+        });
+        this.transactions = data;
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    },
+
     async fetchProducts(query = '') {
       const BearerToken = localStorage.getItem('token');
       try {
@@ -60,9 +81,6 @@ export default {
         hash,
         status: "success",
       }
-
-      console.log(body, "!@?#?!@?#");
-      
       try {
         const { data } = await axios.put('http://localhost:8081/transaction/update', 
         body,
@@ -120,6 +138,7 @@ export default {
             Authorization: BearerToken,
           },
         });
+        this.updateTransactionsRealTime();
         return data;
       } catch (error) {
         console.log(error, "!!!!!!!!!!!!!!!!!");        
@@ -138,17 +157,35 @@ export default {
           const hash = blockchain?.hash;
           const id = local?.transactionId;
           const response = await this.updateTransactions(hash, id);
-          console.log(response?.msg, "????");  
+          if(response){
+            console.log(response?.msg, "????");
+            this.updateTransactionsRealTime();
+          }
         }
 
       } catch (error) {
         console.log(error, "!!!!!!!!!!!!!!!!!");
       }
-    }
+    },
+
+    updateTransactionsRealTime() {
+        WebSocketService.updateTransactionsRealTime();
+    },
+
+    RealTimeTransactions(newMessage) {
+      console.log("newMessage: ", newMessage, "?AS?D?ASD?AS?D");
+      this.transactions = (newMessage);
+    },
   },
 
   mounted() {
+    this.fetchTransactions()
     this.fetchProducts()
+    WebSocketService.responseUpdateTransactionsRealTime(this.RealTimeTransactions);
+  },
+
+  beforeDestroy() {
+    WebSocketService.disconnect();
   },
 }
 </script>
