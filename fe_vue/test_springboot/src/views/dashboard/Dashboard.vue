@@ -3,8 +3,9 @@
     <h1>Dashboard</h1>
     <router-link to="/dashboard/about">About</router-link>
     <router-link to="/dashboard/wallet">Wallet</router-link>
+    <router-link to="/dashboard/etalase">Etalase</router-link>
 
-    <button @click="handleLogout">logout</button>
+    <button class="mt-5" @click="handleLogout">logout</button>
   </div>
 </template>
 
