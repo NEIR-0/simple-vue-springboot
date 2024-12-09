@@ -132,6 +132,6 @@ public class Transactions {
 
     @PreUpdate
     protected void onUpdate() {
-//        updatedAt = new Date();
+        updatedAt = new Date();
     }
 }
