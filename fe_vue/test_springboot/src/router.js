@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import About from './views/about/about.vue'
 import Homepage from './views/Homepage.vue'
 import Dashboard from './views/dashboard/Dashboard.vue'
-import Login from './views/login/login.vue'
-import Register from './views/login/Register.vue'
 import WildCard from './views/WildCard.vue'
 import Wallet from './views/wallet/wallet.vue'
 import MessageComponent from './views/msgTest/MessageComponent.vue'
+import Login from './views/auth/login.vue'
+import Register from './views/auth/Register.vue'
+import About from './views/about/About.vue'
+import Etalase from './views/etalase/etalase.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
@@ -57,6 +58,11 @@ const routes = [
         path: 'wallet',
         name: 'wallet',
         component: Wallet
+      },
+      {
+        path: 'etalase',
+        name: 'etalase',
+        component: Etalase
       }
     ]
   },
