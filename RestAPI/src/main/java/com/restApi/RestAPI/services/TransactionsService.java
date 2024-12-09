@@ -9,7 +9,10 @@ import com.restApi.RestAPI.repository.TransactionsRepository;
 import com.restApi.RestAPI.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class TransactionsService {
@@ -21,6 +24,10 @@ public class TransactionsService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    public List<Transactions> findAll() {
+        return transactionsRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+    }
 
     public ResponseDTOOutput createTransactions(TransactionDTOUserInput inputUser, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

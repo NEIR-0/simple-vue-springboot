@@ -30,6 +30,29 @@ class WebSocketService {
     }
   }
 
+  responseUpdateTransactionsRealTime(callback) {
+    const socket = new SockJS('http://localhost:8081/ws');
+    this.stompClient = Stomp.over(socket);
+    this.stompClient.debug = null // disable log
+
+    this.stompClient.connect({}, (frame) => {
+      console.log('Connected: ' + frame);
+      
+      this.stompClient.subscribe('/topic/updateTransactions', (messageOutput) => {
+        // console.log('Received message: ' + messageOutput.body, ">>>>>>>???");
+        const newMessage = JSON.parse(messageOutput.body);
+        
+        callback(newMessage);
+      });
+    });
+  }
+
+  updateTransactionsRealTime() {
+    if (this.stompClient) {
+      this.stompClient.send('/app/updateTransactions');
+    }
+  }
+
   // Disconnect WebSocket connection
   disconnect() {
     if (this.stompClient) {
