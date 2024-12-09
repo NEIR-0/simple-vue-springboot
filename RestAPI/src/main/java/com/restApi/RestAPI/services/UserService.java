@@ -69,7 +69,7 @@ public class UserService {
         if(matchingUser.isPresent()){
             Users dataUser = matchingUser.get();
             if(passwordEncoder.matches(inputUser.getPassword(), dataUser.getPassword())){
-                return ("Bearer " + jwtUtil.generateToken(inputUser.getEmail(), inputUser.getId()));
+                return ("Bearer " + jwtUtil.generateToken(dataUser.getEmail(), dataUser.getId()));
             } else {
                 return "email / password invalid";
             }

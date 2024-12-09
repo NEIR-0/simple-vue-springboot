@@ -10,8 +10,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-//    @Autowired
-//    private JwtFilter jwtFilter;
+    @Autowired
+    private JwtFilter jwtFilter;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -21,11 +21,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*"); // Mengizinkan semua header
     }
 
-//    @Bean
-//    public FilterRegistrationBean<JwtFilter> jwtFilterRegistration() {
-//        FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
-//        registrationBean.setFilter(jwtFilter);
-//        registrationBean.addUrlPatterns("/users/*"); // Terapkan hanya untuk path tertentu
-//        return registrationBean;
-//    }
+    @Bean
+    public FilterRegistrationBean<JwtFilter> jwtFilterRegistration() {
+        FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(jwtFilter);
+        registrationBean.addUrlPatterns("/**"); // Terapkan hanya untuk path tertentu
+        return registrationBean;
+    }
 }
