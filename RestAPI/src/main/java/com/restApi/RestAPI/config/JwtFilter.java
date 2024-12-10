@@ -6,8 +6,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,8 +13,7 @@ import java.io.IOException;
 // jangan pakai @Configuration pakai @Component, some how lebih aman
 @Component
 public class JwtFilter implements Filter {
-    private final String secretKey = "rahasia";  // Sesuaikan dengan secret key
-    private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
+    private final String secretKey = "{jwt.secret}";
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -26,16 +23,18 @@ public class JwtFilter implements Filter {
 
         // Ambil header Authorization
         String authHeader = httpRequest.getHeader("Authorization");
+        System.out.println("token: " + authHeader);
 
         // Cek apakah header Authorization ada dan dimulai dengan "Bearer "
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7); // Ambil token setelah "Bearer "
-            logger.info("Token received: {}", token);
+            String[] token = authHeader.split(" ");
+            System.out.println("rawToken: " + token[0]);
+            System.out.println("rawToken: " + token[1]);
 
             try {
                 // Verifikasi token
                 Algorithm algorithm = Algorithm.HMAC256(secretKey);
-                JWT.require(algorithm).build().verify(token);
+                JWT.require(algorithm).build().verify(token[1]);
             } catch (JWTVerificationException e) {
                 // Jika token tidak valid
                 httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

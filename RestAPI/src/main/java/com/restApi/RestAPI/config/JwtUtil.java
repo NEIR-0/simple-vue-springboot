@@ -10,7 +10,7 @@ import java.util.Date;
 @Configuration
 public class JwtUtil {
 
-    private String secretKey = "rahasia";  // Secret key, should be stored securely
+    private final String secretKey = "{jwt.secret}";
 
     public String generateToken(String email, Long id) {
         Algorithm algorithm = Algorithm.HMAC256(secretKey);

@@ -16,8 +16,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Mengizinkan semua path URL
-                .allowedOrigins("http://localhost:5173") // Mengizinkan hanya dari origin ini
-                .allowedMethods("GET", "POST", "PUT", "DELETE") // Mengizinkan metode HTTP tertentu
+                .allowedOrigins("*") // Mengizinkan hanya dari origin ini
+                .allowedMethods("*") // Mengizinkan metode HTTP tertentu
                 .allowedHeaders("*"); // Mengizinkan semua header
     }
 
@@ -25,7 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
     public FilterRegistrationBean<JwtFilter> jwtFilterRegistration() {
         FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(jwtFilter);
-        registrationBean.addUrlPatterns("/**"); // Terapkan hanya untuk path tertentu
+        registrationBean.addUrlPatterns("/users"); // Terapkan hanya untuk path tertentu
         return registrationBean;
     }
 }
