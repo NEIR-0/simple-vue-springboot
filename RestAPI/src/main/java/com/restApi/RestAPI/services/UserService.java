@@ -37,7 +37,7 @@ public class UserService {
 
         return usersPage.getContent()
                 .stream()
-                .map(user -> new UserDTO(user.getId(), user.getEmail()))
+                .map(user -> new UserDTO(user.getId(), user.getEmail(), user.getRole()))
                 .collect(Collectors.toList());
     }
 

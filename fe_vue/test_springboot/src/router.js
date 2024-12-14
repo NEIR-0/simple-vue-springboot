@@ -8,6 +8,9 @@ import Login from './views/auth/login.vue'
 import Register from './views/auth/Register.vue'
 import About from './views/about/About.vue'
 import Etalase from './views/etalase/etalase.vue'
+import CreateProducts from './views/admin/CreateProducts.vue'
+import ListProducts from './views/admin/ListProducts.vue'
+import UpdateProducts from './views/admin/UpdateProducts.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
@@ -39,6 +42,7 @@ const routes = [
     name: 'testmsg',
     component: MessageComponent
   },
+  // dashboard
   {
     path: '/dashboard',
     name: 'dashboardLayout',
@@ -63,6 +67,29 @@ const routes = [
         path: 'etalase',
         name: 'etalase',
         component: Etalase
+      }
+    ]
+  },
+  // admin
+  {
+    path: '/admin',
+    name: 'admin',
+    // beforeEnter: auth, 
+    children: [
+      {
+        path: '',
+        name: 'list-products',
+        component: ListProducts
+      },
+      {
+        path: 'create-product',
+        name: 'create-product',
+        component: CreateProducts
+      },
+      {
+        path: 'update-product/:id',
+        name: 'update-product',
+        component: UpdateProducts
       }
     ]
   },

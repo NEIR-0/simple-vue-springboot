@@ -4,7 +4,7 @@
     <router-link to="/dashboard/about">About</router-link>
     <router-link to="/dashboard/wallet">Wallet</router-link>
     <router-link to="/dashboard/etalase">Etalase</router-link>
-
+    <router-link to="/admin/">Shop</router-link>
     <button class="mt-5" @click="handleLogout">logout</button>
   </div>
 </template>
