@@ -14,4 +14,12 @@ input[type=number] {
 .bgLogin{
   background-image: url('https://images.alphacoders.com/113/thumb-1920-1130458.png');
   background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.bgEtalase{
+  background-image: url('https://c4.wallpaperflare.com/wallpaper/964/600/925/ghost-pixel-art-pixels-wallpaper-preview.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
 }
