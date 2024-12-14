@@ -149,20 +149,20 @@ export default {
       try {
         const local = await this.createTransactions(data);
         console.log("local: ", local);
-        
-        const blockchain = await this.createBlockchain(data.description, data.price);
-        console.log("blockchain: ", blockchain);
-
-        if(blockchain && blockchain?.hash && local && local?.transactionId) {
-          const hash = blockchain?.hash;
-          const id = local?.transactionId;
-          const response = await this.updateTransactions(hash, id);
-          if(response){
-            console.log(response?.msg, "????");
-            this.updateTransactionsRealTime();
+        if(local){
+          const blockchain = await this.createBlockchain(data.description, data.price);
+          console.log("blockchain: ", blockchain);
+  
+          if(blockchain && blockchain?.hash && local && local?.transactionId) {
+            const hash = blockchain?.hash;
+            const id = local?.transactionId;
+            const response = await this.updateTransactions(hash, id);
+            if(response){
+              console.log(response?.msg, "????");
+              this.updateTransactionsRealTime();
+            }
           }
         }
-
       } catch (error) {
         console.log(error, "!!!!!!!!!!!!!!!!!");
       }
