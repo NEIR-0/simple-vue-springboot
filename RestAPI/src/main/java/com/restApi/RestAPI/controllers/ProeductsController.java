@@ -4,10 +4,10 @@ import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.model.product.Products;
 import com.restApi.RestAPI.services.ProductsService;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,5 +59,11 @@ public class ProeductsController {
         } else {
             return ResponseEntity.badRequest().body(status);
         }
+    }
+
+    @MessageMapping("/updateDataRealTime")
+    @SendTo("/topic/updateDataRealTime")
+    public List<Products> updateDataRealTime(){
+        return productsService.getAllProducts();
     }
 }

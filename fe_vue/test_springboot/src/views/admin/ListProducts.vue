@@ -27,6 +27,7 @@
   
 <script>  
 import axios from 'axios';
+import WebSocketService from '../../services/WebSocketService';
 
 export default {
   data() {
@@ -71,7 +72,7 @@ export default {
           },
         });
         console.log(data);
-        
+        this.updateDataDeleteProducts();
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -80,9 +81,23 @@ export default {
     navigateToUpdate(id=null) {
       this.$router.push('/admin/update-product/' + id);
     },
+
+    updateDataDeleteProducts() {
+        WebSocketService.UpdateDataDeleteProductsRealTime();
+    },
+
+    GetDataUpdateProducts(newMessage) {
+      console.log(newMessage, "?????");
+      this.products = newMessage
+    },
   },
   mounted() {
     this.fetchProducts()
+    WebSocketService.responseUpdateDataDeleteProductsRealTime(this.GetDataUpdateProducts);
+  },
+
+  beforeDestroy() {
+    WebSocketService.disconnect();
   },
 }
 </script>
