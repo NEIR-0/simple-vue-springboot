@@ -23,6 +23,7 @@
             <tr v-for="user in users" :key="user.id">
               <td class="border px-4 py-2">{{ user.id }}</td>
               <td class="border px-4 py-2">{{ user.email }}</td>
+              <td class="border px-4 py-2">{{ user.role }}</td>
             </tr>
           </tbody>
         </table>

@@ -92,6 +92,6 @@ public class Products {
 
     @PreUpdate
     public void onUpdate() {
-        // on update...
+        this.updatedAt = new Date();
     }
 }

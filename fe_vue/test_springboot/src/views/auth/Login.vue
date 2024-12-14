@@ -6,6 +6,7 @@
         <input v-model="password" type="text" placeholder="Enter password" />
         <button type="submit">Submit</button>
       </form>
+      <router-link to="/register" class="mt-5">Register</router-link>
     </div>
 </template>
 
