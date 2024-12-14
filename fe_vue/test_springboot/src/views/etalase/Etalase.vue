@@ -1,21 +1,27 @@
 <template>
-    <div class="h-screen p-5 bg-red-300">
-      <div v-if="products.length > 0" class="w-full h-fit flex space-x-2">
-        <div v-for="product in products" :key="product.id">
-          <div class="w-[300px] h-fit p-5 bg-white rounded-md">
-            <img :src="product?.image" alt="">
-            <div class="w-full mt-2 flex flex-col space-y-3">
-              <h1>{{ product?.title }}</h1>
-              <p class="text-xs">{{ product?.description }}</p>
-              <button @click="createTransactionsAndBlockchain(product)" class="w-full h-10 rounded-md bg-green-300 text-white font-bold">BUY, {{ product?.price }} ETH</button>
+    <div class="h-screen overflow-hidden w-full flex flex-col items-start justify-center bgEtalase">
+      <div class="text-white w-full h-full py-14 space-y-2 px-5">
+        <div class="">
+          <h1 class="font-bold text-white text-3xl capitalize">choose your products</h1>
+          <p class="font-light text-white text-sm">Lorem ipsum dolor sit amet consectetur adipisicing elit. A, totam. </p>
+        </div>
+        <div class="w-[70%] h-full overflow-y-scroll">
+          <div v-if="products.length > 0" class="w-full h-fit grid grid-cols-4 gap-2 pt-4 pb-10">
+            <div v-for="product in products" :key="product.id">
+              <CardProducts :products="product" :onBuy="createTransactionsAndBlockchain" :isWalletConnected="isWalletConnected" :connectWallets="connectWallets" />
             </div>
           </div>
+    
+          <!-- <ul v-if="transactions?.length > 0" class="mt-10">
+            <li v-for="transaction in transactions">{{transaction?.id}} {{transaction?.status}}</li>
+          </ul> -->
         </div>
       </div>
-
-      <ul v-if="transactions?.length > 0" class="mt-10">
-        <li v-for="transaction in transactions">{{transaction?.id}} {{transaction?.status}}</li>
-      </ul>
+      <div class="h-fit w-[28%] bg-yellow-500 absolute right-5 top-36 flex items-center justify-center p-5">
+        <div class="w-full">
+          <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="search..." name="search" id="search">
+        </div>
+      </div>
     </div>
 </template>
 
@@ -24,8 +30,12 @@ import axios from 'axios';
 import abi from "../../../abi/TransactionStorage.js";
 import { ethers } from "ethers";
 import WebSocketService from '../../services/WebSocketService';
+import CardProducts from '../../components/CardProducts.vue'
 
 export default {
+  components: {
+    CardProducts,
+  },
   data() {
     return {
       transactions: [],
@@ -34,6 +44,7 @@ export default {
       totalPages: 0,
       pageSize: 10,
       searchQuery: '',
+      isWalletConnected: false,
     };
   },
   methods: {
@@ -65,8 +76,7 @@ export default {
             'Content-Type': 'application/json',
             Authorization: BearerToken,
           },
-        });
-        
+        });  
         this.products = data;
         this.totalPages = Math.ceil(data.length / this.pageSize);
       } catch (error) {
@@ -168,12 +178,34 @@ export default {
       }
     },
 
+    async connectWallets() {
+      try {
+        if (typeof window.ethereum !== "undefined") {
+          await ethereum.request({ method: "eth_requestAccounts" });
+          const prov = new ethers.providers.Web3Provider(window.ethereum);
+          const sig = await prov.getSigner();
+          const address = await sig.getAddress();
+          if(address){
+            this.isWalletConnected = true
+          }
+        } else {
+          console.log("Ethereum wallet is not connected. !!!!!");
+        }
+      } catch (error) {
+        console.log(error, "!!!!!!!!!!!!!!!!!");        
+      }
+    },
+
+    onSearch() {
+      this.currentPage = 0;
+      this.fetchProducts(this.searchQuery);
+    },
+
     updateTransactionsRealTime() {
         WebSocketService.updateTransactionsRealTime();
     },
 
     RealTimeTransactions(newMessage) {
-      console.log("newMessage: ", newMessage, "?AS?D?ASD?AS?D");
       this.transactions = (newMessage);
     },
   },

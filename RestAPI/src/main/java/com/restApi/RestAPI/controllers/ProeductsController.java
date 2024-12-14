@@ -20,8 +20,10 @@ public class ProeductsController {
     ProductsService productsService;
 
     @GetMapping
-    public List<Products> getAllProducts(){
-        return productsService.getAllProducts();
+    public List<Products> getAllProducts(
+        @RequestParam(value = "search", required = false) String search
+    ){
+        return productsService.getAllProducts(search);
     }
 
     @GetMapping("/{productId}")
@@ -64,6 +66,6 @@ public class ProeductsController {
     @MessageMapping("/updateDataRealTime")
     @SendTo("/topic/updateDataRealTime")
     public List<Products> updateDataRealTime(){
-        return productsService.getAllProducts();
+        return productsService.getAllProducts("");
     }
 }

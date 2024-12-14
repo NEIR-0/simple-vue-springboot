@@ -31,8 +31,12 @@ public class ProductsService {
     @Autowired
     ProductsRepository productsRepository;
 
-    public List<Products> getAllProducts(){
-        return productsRepository.findAll();
+    public List<Products> getAllProducts(String search){
+        if (search != null && !search.isEmpty()) {
+            return productsRepository.findByTitleContainingIgnoreCase(search);
+        } else {
+            return productsRepository.findAll();
+        }
     }
 
     public Products getProductsById(Long productId) {
