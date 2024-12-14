@@ -10,3 +10,8 @@ input[type=number]::-webkit-outer-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+.bgLogin{
+  background-image: url('https://images.alphacoders.com/113/thumb-1920-1130458.png');
+  background-position: center;
+}
