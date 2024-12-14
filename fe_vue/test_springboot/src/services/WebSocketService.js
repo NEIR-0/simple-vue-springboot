@@ -53,6 +53,28 @@ class WebSocketService {
     }
   }
 
+  responseUpdateDataDeleteProductsRealTime(callback) {
+    const socket = new SockJS('http://localhost:8081/ws');
+    this.stompClient = Stomp.over(socket);
+    this.stompClient.debug = null // disable log
+
+    this.stompClient.connect({}, (frame) => {
+      console.log('Connected: ' + frame);
+      
+      this.stompClient.subscribe('/topic/updateDataRealTime', (messageOutput) => {
+        console.log('Received message: ' + messageOutput.body, ">>>>>>>???");
+        const newMessage = JSON.parse(messageOutput.body);
+        callback(newMessage);
+      });
+    });
+  }
+
+  UpdateDataDeleteProductsRealTime() {
+    if (this.stompClient) {
+      this.stompClient.send('/app/updateDataRealTime');
+    }
+  }
+
   // Disconnect WebSocket connection
   disconnect() {
     if (this.stompClient) {
