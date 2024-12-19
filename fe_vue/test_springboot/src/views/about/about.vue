@@ -63,8 +63,9 @@ export default {
           },
           headers: {
             'Content-Type': 'application/json',
-            Authorization: BearerToken,
+            'Authorization': BearerToken,
           },
+          withCredentials: true
         });
         this.users = data;
         this.totalPages = Math.ceil(data.length / this.pageSize);
