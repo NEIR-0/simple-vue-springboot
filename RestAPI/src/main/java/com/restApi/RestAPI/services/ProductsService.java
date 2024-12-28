@@ -79,7 +79,8 @@ public class ProductsService {
             // Otherwise, handle image file upload
             fileName = image.getOriginalFilename();
             assert fileName != null;
-            String titleFormating = fileName.replaceAll("-", "_").replace(".jpg", "");
+            String titleFormating = fileName.replaceAll("[-_]", " ")
+                    .replaceAll("\\.(jpg|jpeg|png)$", "");
             ImageStore newImageStore = new ImageStore();
             newImageStore.setTitle(titleFormating);
             newImageStore.setImageName(fileName);
@@ -137,7 +138,8 @@ public class ProductsService {
             // Simpan gambar baru
             fileName = image.getOriginalFilename();
             assert fileName != null;
-            fileName = fileName.replaceAll("-", "_"); // Normalisasi nama file
+            fileName = fileName.replaceAll("[-_]", " ")
+                    .replaceAll("\\.(jpg|jpeg|png)$", "");
 
             // Simpan metadata gambar ke ImageStore
             ImageStore newImageStore = new ImageStore();

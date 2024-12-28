@@ -46,7 +46,7 @@
     <div v-if="!isUpdate" class="w-full">
       <div :class="`${imagesList?.length > 0 ? 'grid-cols-2' : 'grid-cols-1'} 'h-fit grid gap-4 mb-2`">
         <select
-          v-if="imagesList?.length > 0 && !showCancelChangeImageInput"
+          v-if="imagesList?.length > 0 && !showImages"
           @change="selectImages"
           v-model="selectedImage"
           id="images"
@@ -59,7 +59,7 @@
         </select>
         <div
           @click="showAddNewImages"
-          v-if="imagesList?.length > 0 && !showCancelChangeImageInput"
+          v-if="imagesList?.length > 0 && !showImages"
           class="w-full h-10 p-5 flex items-center justify-center rounded-md font-semibold text-slate-800 bg-slate-200 hover:bg-slate-300 duration-300 ease-in-out cursor-pointer"
         >
           Add Another Image
@@ -98,7 +98,7 @@
         <label for="fileInput" class="cursor-pointer gap-1 flex flex-col sm:w-full w-[200px]">
           <p class="text-[#108CDD] sm:text-sm text-xs font-medium">Click to upload</p>
           <p class="text-neutral-500 font-medium sm:text-sm text-xs">
-            You can only upload PNG, JPG, JPEG, GIF file(s)
+            You can only upload PNG, JPG, JPEG
           </p>
         </label>
       </div>
@@ -187,7 +187,7 @@
           <label for="fileInput" class="cursor-pointer gap-1 flex flex-col sm:w-full w-[200px]">
             <p class="text-[#108CDD] sm:text-sm text-xs font-medium">Click to upload</p>
             <p class="text-neutral-500 font-medium sm:text-sm text-xs">
-              You can only upload PNG, JPG, JPEG, GIF file(s)
+              You can only upload PNG, JPG, JPEG
             </p>
           </label>
         </div>
