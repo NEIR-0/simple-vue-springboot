@@ -87,4 +87,18 @@ public class UserService {
             return responseStatus;
         }
     }
+
+    public ResponseDTOOutput emailChecker(String inputUser){
+        Optional<Users> matchingUser = userRepository.findByEmail(inputUser);
+        ResponseDTOOutput responseStatus = new ResponseDTOOutput();
+        if (matchingUser.isPresent()) {
+            responseStatus.setMsg("email already exist");
+            responseStatus.setStatus("failed");
+            return responseStatus;
+        } else {
+            responseStatus.setMsg("email available");
+            responseStatus.setStatus("success");
+            return responseStatus;
+        }
+    }
 }

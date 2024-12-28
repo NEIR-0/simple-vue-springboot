@@ -10,8 +10,8 @@
 </template>
 
 <script>
-import axios from 'axios';
 import FormProducts from '../../components/FormProducts.vue'
+import apiMethods from '../../services/apiMothods';
 
 export default {
   components: {
@@ -34,15 +34,10 @@ export default {
   },
   methods: {
     async fetchProductsById() {
-      const BearerToken = localStorage.getItem('token');
-      const productId = this.$route.params.id;
       try {
-        const { data } = await axios.get('http://localhost:8081/products/' + productId, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: BearerToken,
-          },
-        });
+        const productId = this.$route.params.id;
+        const endpoint = '/products/' + productId;
+        const data = await apiMethods.getData(endpoint);
 
         this.productForm = {
           title: data.title,
@@ -77,20 +72,14 @@ export default {
         formData.append('prevImage', this.productForm.image);
       }
       // Send form data to the backend
-      this.submitData(formData, BearerToken);
+      this.submitData(formData);
     },
 
-    async submitData(formData, BearerToken) {
-      const productId = this.$route.params.id;
+    async submitData(formData) {
       try {
-        const config = {
-          headers: {
-            'Authorization': `${BearerToken}`,
-            'Content-Type': 'multipart/form-data',  // Gunakan multipart/form-data
-          }
-        };
-
-        const {data} = await axios.put('http://localhost:8081/products/update/' + productId, formData, config);
+        const productId = this.$route.params.id;
+        const endpoint = "/products/update/" + productId
+        const data = await apiMethods.putDataFormData(endpoint, formData);
         
         this.productForm = {  // Reset form
           title: '',
@@ -109,16 +98,9 @@ export default {
     },
 
     async fetchAllImages() {
-      const BearerToken = localStorage.getItem('token');
       try {
-        const { data } = await axios.get('http://localhost:8081/image-store', {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: BearerToken,
-          },
-        });
-
-        this.imagesList = data
+        const response = await apiMethods.getData("/image-store");
+        this.imagesList = response
       } catch (error) {
         console.error('Error fetching data:', error);
       }

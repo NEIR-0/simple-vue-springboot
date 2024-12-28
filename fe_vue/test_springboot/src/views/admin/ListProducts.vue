@@ -13,9 +13,9 @@
 </template>
   
 <script>  
-import axios from 'axios';
 import WebSocketService from '../../services/WebSocketService';
 import CardProducts from '../../components/CardProducts.vue'
+import apiMethods from '../../services/apiMothods';
 
 export default {
   components: {
@@ -32,36 +32,24 @@ export default {
   },
   methods: {
     async fetchProducts(query = '') {
-      const BearerToken = localStorage.getItem('token');
       try {
-        const { data } = await axios.get('http://localhost:8081/products', {
-          params: {
-            page: this.currentPage,
-            size: this.pageSize,
-            search: query,
-          },
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: BearerToken,
-          },
-        });
-        
-        this.products = data;
-        this.totalPages = Math.ceil(data.length / this.pageSize);
+        const params = {
+          page: this.currentPage,
+          size: this.pageSize,
+          search: query,
+        }
+        const response = await apiMethods.getData("/products", params);
+        this.products = response;
+        this.totalPages = Math.ceil(response.length / this.pageSize);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     },
 
     async deleteProduct(id=null) {
-      const BearerToken = localStorage.getItem('token');
       try {
-        const { data } = await axios.delete('http://localhost:8081/products/' + id, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: BearerToken,
-          },
-        });
+        const endpoint = '/products/' + id;
+        const response = await apiMethods.deleteData(endpoint);
         this.updateDataDeleteProducts();
       } catch (error) {
         console.error('Error fetching data:', error);

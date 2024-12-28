@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import apiMethods from '../../services/apiMothods';
 
 export default {
   data() {
@@ -53,20 +53,14 @@ export default {
   },
   methods: {
     async fetchUsers(query = '') {
-      const BearerToken = localStorage.getItem('token');
       try {
-        const { data } = await axios.get('http://localhost:8081/users', {
-          params: {
-            page: this.currentPage,
-            size: this.pageSize,
-            search: query,
-          },
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': BearerToken,
-          },
-          withCredentials: true
-        });
+        const params = {
+          page: this.currentPage,
+          size: this.pageSize,
+          search: query,
+        }
+        const data = await apiMethods.getData("/users", params);
+
         this.users = data;
         this.totalPages = Math.ceil(data.length / this.pageSize);
       } catch (error) {

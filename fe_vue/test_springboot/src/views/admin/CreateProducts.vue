@@ -10,8 +10,9 @@
 </template>
 
 <script>
-import axios from 'axios';
 import FormProducts from '../../components/FormProducts.vue'
+import apiMethods from '../../services/apiMothods';
+
 export default {
   components: {
     FormProducts,
@@ -54,14 +55,7 @@ export default {
 
     async submitData(formData, BearerToken) {
       try {
-        const config = {
-          headers: {
-            'Authorization': `${BearerToken}`,
-            'Content-Type': 'multipart/form-data',  // Gunakan multipart/form-data
-          }
-        };
-
-        const {data} = await axios.post('http://localhost:8081/products/create', formData, config);
+        const response = await apiMethods.postDataFormData("/products/create", formData);
         
         this.productForm = {  // Reset form
           title: '',
@@ -77,16 +71,9 @@ export default {
     },
 
     async fetchAllImages() {
-      const BearerToken = localStorage.getItem('token');
       try {
-        const { data } = await axios.get('http://localhost:8081/image-store', {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: BearerToken,
-          },
-        });
-
-        this.imagesList = data
+        const response = await apiMethods.getData("/image-store");
+        this.imagesList = response
       } catch (error) {
         console.error('Error fetching data:', error);
       }
