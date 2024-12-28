@@ -18,16 +18,28 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> createUser(@Valid @RequestBody Users inputUser, BindingResult result) {
+    public ResponseEntity<ResponseDTOOutput> createUser(@Valid @RequestBody Users inputUser, BindingResult result) {
         if (result.hasErrors()) {
+            // Kumpulkan semua pesan error
             StringBuilder errorMessages = new StringBuilder();
             result.getAllErrors().forEach(error -> {
                 errorMessages.append(error.getDefaultMessage()).append("\n");
             });
-            return ResponseEntity.badRequest().body(errorMessages.toString());
+
+            // Buat response DTO output untuk error
+            ResponseDTOOutput errorResponse = new ResponseDTOOutput();
+            errorResponse.setStatus("failed");
+            errorResponse.setMsg(errorMessages.toString());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
-        userService.createUser(inputUser);
-        return ResponseEntity.ok("User created successfully");
+        ResponseDTOOutput checkEmail = userService.emailChecker(inputUser.getEmail());
+        if (!Objects.equals(checkEmail.getStatus(), "failed")) {
+            userService.createUser(inputUser);
+            return ResponseEntity.ok(checkEmail);
+        } else {
+            return ResponseEntity.badRequest().body(checkEmail);
+        }
+
     }
 
     @PostMapping("/login")

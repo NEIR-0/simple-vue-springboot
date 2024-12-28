@@ -40,8 +40,8 @@
 
 
 <script>
-import axios from 'axios'
 import CardImg from '../../components/auth/cardImg.vue';
+import apiMethods from '../../services/apiMothods';
 
 export default {
   data() {
@@ -56,10 +56,11 @@ export default {
   methods: {
     async submitForm() {
       try {
-        const {data} = await axios.post('http://localhost:8081/auth/login', {
+        const body =  {
           email: this.email,
           password: this.password
-        })
+        }
+        const data = await apiMethods.postData("/auth/login", body);
         
         localStorage.setItem('token', data?.msg); 
         localStorage.setItem('role', data?.status);

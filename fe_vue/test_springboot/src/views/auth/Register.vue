@@ -11,7 +11,7 @@
 
 
 <script>
-import axios from 'axios'
+import apiMethods from '../../services/apiMothods';
 
 export default {
   data() {
@@ -23,17 +23,11 @@ export default {
   methods: {
     async submitForm() {
       try {
-        const {data} = await axios.post('http://localhost:8081/auth/register', {
+        const body =  {
           email: this.email,
           password: this.password
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-
-        console.log(data);
+        }
+        const data = await apiMethods.postData("/auth/register", body);
 
         this.email = ''
         this.password = ''

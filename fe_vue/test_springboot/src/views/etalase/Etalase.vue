@@ -26,11 +26,11 @@
 </template>
 
 <script>
-import axios from 'axios';
 import abi from "../../../abi/TransactionStorage.js";
 import { ethers } from "ethers";
 import WebSocketService from '../../services/WebSocketService';
 import CardProducts from '../../components/CardProducts.vue'
+import apiMethods from '../../services/apiMothods';
 
 export default {
   components: {
@@ -49,14 +49,8 @@ export default {
   },
   methods: {
     async fetchTransactions() {
-      const BearerToken = localStorage.getItem('token');
       try {
-        const { data } = await axios.get('http://localhost:8081/transaction', {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: BearerToken,
-          },
-        });
+        const data = await apiMethods.getData("/transaction");
         this.transactions = data;
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -64,19 +58,14 @@ export default {
     },
 
     async fetchProducts(query = '') {
-      const BearerToken = localStorage.getItem('token');
       try {
-        const { data } = await axios.get('http://localhost:8081/products', {
-          params: {
-            page: this.currentPage,
-            size: this.pageSize,
-            search: query,
-          },
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: BearerToken,
-          },
-        });  
+        const params = {
+          page: this.currentPage,
+          size: this.pageSize,
+          search: query,
+        }
+        const data = await apiMethods.getData("/products", params);
+
         this.products = data;
         this.totalPages = Math.ceil(data.length / this.pageSize);
       } catch (error) {
@@ -85,21 +74,13 @@ export default {
     },
 
     async updateTransactions(hash = '', id = null) {
-      const BearerToken = localStorage.getItem('token');
-      const body = {
-        transactionId: id,
-        hash,
-        status: "success",
-      }
       try {
-        const { data } = await axios.put('http://localhost:8081/transaction/update', 
-        body,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: BearerToken,
-          },
-        });
+        const body = {
+          transactionId: id,
+          hash,
+          status: "success",
+        }
+        const data = await apiMethods.putData("/transaction/update", body);
         return data;
       } catch (error) {
         console.log(error, "!!!!!!!!!!!!!!!!!");        
@@ -133,21 +114,13 @@ export default {
     },
 
     async createTransactions(data) {
-      const BearerToken = localStorage.getItem('token');
-      const body = {
-        des: data.description,
-        price: data.price,
-        status: "pending",
-      }
       try {
-        const { data } = await axios.post('http://localhost:8081/transaction/create', 
-        body,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: BearerToken,
-          },
-        });
+        const body = {
+          des: data.description,
+          price: data.price,
+          status: "pending",
+        }
+        const data = await apiMethods.postData("/transaction/create", body);
         this.updateTransactionsRealTime();
         return data;
       } catch (error) {
