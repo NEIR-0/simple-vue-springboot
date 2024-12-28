@@ -1,25 +1,12 @@
 <template>
-  <div class="h-screen flex flex-col items-center justify-center p-5 bg-red-300">
-    <h1>List Products</h1>
-    <router-link to="/admin/create-product">create product</router-link>
-
-    <div v-if="products.length > 0" class="w-full h-fit flex flex-wrap justify-center gap-2 mt-20">
+  <div class="h-fit w-full flex flex-col items-center justify-center py-14 px-5 relative">
+    <div class="absolute top-16 right-20">
+      <router-link class="bg-red-200 rounded-md py-2 px-10 items-center justify-center" to="/admin/create-product">+ create product</router-link>
+    </div>
+    <h1 class="text-3xl font-semibold">List Products</h1>
+    <div v-if="products.length > 0" class="w-full h-fit flex flex-wrap justify-center gap-10 mt-5 py-10">
       <div v-for="product in products" :key="product.id">
-        <div class="w-[300px] h-fit p-5 bg-white rounded-md">
-          <img :src="product?.image" class="w-full h-[150px]" alt="">
-          <div class="w-full mt-2 flex flex-col space-y-3">
-            <h1>{{ product?.title }}</h1>
-            <div class="w-full h-[50px] overflow-y-scroll">
-              <p class="text-xs break-words">{{ product?.description }}</p>
-            </div>
-            <p class="text-xs">{{ product?.price }} ETH</p>
-          </div>
-
-          <div class="w-full flex justify-between mt-5">
-            <button @click="navigateToUpdate(product.id)" class="w-[48%] h-10 flex items-center justify-center bg-yellow-300">edit</button>
-            <button @click="deleteProduct(product.id)" class="w-[48%] h-10 flex items-center justify-center bg-red-300">delete</button>
-          </div>
-        </div>
+        <CardProducts :products="product" :isAdmin="true" :navigateToUpdate="navigateToUpdate" :deleteProduct="deleteProduct" />
       </div>
     </div>
   </div>
@@ -28,8 +15,12 @@
 <script>  
 import axios from 'axios';
 import WebSocketService from '../../services/WebSocketService';
+import CardProducts from '../../components/CardProducts.vue'
 
 export default {
+  components: {
+    CardProducts,
+  },
   data() {
     return {
       products: [],
@@ -71,7 +62,6 @@ export default {
             Authorization: BearerToken,
           },
         });
-        console.log(data);
         this.updateDataDeleteProducts();
       } catch (error) {
         console.error('Error fetching data:', error);

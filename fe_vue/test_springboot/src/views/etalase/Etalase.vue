@@ -17,9 +17,9 @@
           </ul> -->
         </div>
       </div>
-      <div class="h-fit w-[28%] bg-yellow-500 absolute right-5 top-36 flex items-center justify-center p-5">
+      <div class="h-fit w-[28%] bg-[#EAE3D8] absolute right-5 top-36 flex items-center justify-center p-5 rounded-md">
         <div class="w-full">
-          <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="search..." name="search" id="search">
+          <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="Search..." name="search" id="search">
         </div>
       </div>
     </div>

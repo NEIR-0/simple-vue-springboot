@@ -1,5 +1,6 @@
 package com.restApi.RestAPI.controllers;
 
+import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.services.UserService;
 import jakarta.validation.Valid;
@@ -7,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/auth")
@@ -23,19 +26,17 @@ public class AuthController {
             });
             return ResponseEntity.badRequest().body(errorMessages.toString());
         }
-
         userService.createUser(inputUser);
         return ResponseEntity.ok("User created successfully");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Users inputUser) {
-        String loginResult = userService.findByEmail(inputUser);
-        if (loginResult.startsWith("Bearer ")) {
+    public ResponseEntity<ResponseDTOOutput> login(@RequestBody Users inputUser) {
+        ResponseDTOOutput loginResult = userService.findByEmail(inputUser);
+        if (!Objects.equals(loginResult.getStatus(), "failed")) {
             return ResponseEntity.ok(loginResult);
         } else {
             return ResponseEntity.badRequest().body(loginResult);
-
         }
     }
 }

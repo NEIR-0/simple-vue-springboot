@@ -3,6 +3,7 @@ package com.restApi.RestAPI.config;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,12 +29,18 @@ public class JwtFilter implements Filter {
         httpResponse.setHeader("Access-Control-Expose-Headers", "Authorization");
         httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
 
+        // validasi untuk get products
+        String path = httpRequest.getRequestURI();
+        String method = httpRequest.getMethod();
+        if ("/products".equals(path) && "GET".equalsIgnoreCase(method)) {
+            chain.doFilter(request, response);
+            return; // Lewatkan tanpa validasi
+        }
+
         if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
             httpResponse.setStatus(HttpServletResponse.SC_OK);
             return;
         }
-
-        String test = httpRequest.getHeader("Authorization");
 
         // Ambil header Authorization
         String authHeader = httpRequest.getHeader("Authorization");
@@ -48,7 +55,15 @@ public class JwtFilter implements Filter {
                 Algorithm algorithm = Algorithm.HMAC256(secretKey);
                 System.out.println("secretKey: " + secretKey + ">>>>>>>>>>>");
                 System.out.println("token: " + token[1] + ">>>>>>>>>>>");
-                JWT.require(algorithm).build().verify(token[1]);
+                DecodedJWT decodedJWT = JWT.require(algorithm).build().verify(token[1]);
+
+                //  decodedJWT.getClaims().forEach((key, value) -> {
+                //      System.out.println(key + ": " + value.asString());
+                //  });
+                Long userId = decodedJWT.getClaim("id").asLong();
+                String userRole = decodedJWT.getClaim("role").asString();
+                request.setAttribute("userId", userId);
+                request.setAttribute("userRole", userRole);
             } catch (JWTVerificationException e) {
                 // Jika token tidak valid
                 httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

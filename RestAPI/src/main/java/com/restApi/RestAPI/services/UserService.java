@@ -2,6 +2,7 @@ package com.restApi.RestAPI.services;
 
 import com.restApi.RestAPI.config.JwtUtil;
 import com.restApi.RestAPI.dto.UserDTO;
+import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,17 +65,26 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public String findByEmail(Users inputUser){
+    public ResponseDTOOutput findByEmail(Users inputUser){
         Optional<Users> matchingUser = userRepository.findByEmail(inputUser.getEmail());
+        ResponseDTOOutput responseStatus = new ResponseDTOOutput();
+
         if(matchingUser.isPresent()){
             Users dataUser = matchingUser.get();
             if(passwordEncoder.matches(inputUser.getPassword(), dataUser.getPassword())){
-                return ("Bearer " + jwtUtil.generateToken(dataUser.getEmail(), dataUser.getId()));
+                String token = "Bearer " + jwtUtil.generateToken(dataUser.getEmail(), dataUser.getId(), dataUser.getRole());
+                responseStatus.setMsg(token);
+                responseStatus.setStatus(dataUser.getRole());
+                return responseStatus;
             } else {
-                return "email / password invalid";
+                responseStatus.setMsg("email / password invalid");
+                responseStatus.setStatus("failed");
+                return responseStatus;
             }
         }else{
-            return "email / password invalid";
+            responseStatus.setMsg("email / password invalid");
+            responseStatus.setStatus("failed");
+            return responseStatus;
         }
     }
 }

@@ -12,11 +12,12 @@ public class JwtUtil {
 
     private final String secretKey = "{jwt.secret}";
 
-    public String generateToken(String email, Long id) {
+    public String generateToken(String email, Long id, String role) {
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         return JWT.create()
                 .withSubject(email)
                 .withClaim("id", id)
+                .withClaim("role", role)
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 60))  // Token expires in 1 hour
                 .sign(algorithm);

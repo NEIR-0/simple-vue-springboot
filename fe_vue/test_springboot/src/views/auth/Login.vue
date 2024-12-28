@@ -61,7 +61,8 @@ export default {
           password: this.password
         })
         
-        localStorage.setItem('token', data); 
+        localStorage.setItem('token', data?.msg); 
+        localStorage.setItem('role', data?.status);
 
         this.email = ''
         this.password = ''
