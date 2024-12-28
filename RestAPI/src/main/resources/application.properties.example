@@ -10,3 +10,4 @@ spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.hibernate.naming-strategy=org.hibernate.cfg.ImprovedNamingStrategy
 spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 jwt.secret=random_word
+upload.folder=uploads/

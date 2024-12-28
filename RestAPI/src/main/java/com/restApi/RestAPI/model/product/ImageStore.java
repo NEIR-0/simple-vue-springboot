@@ -5,23 +5,15 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "products")
-public class Products {
+@Table(name = "image_store")
+public class ImageStore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
 
-    private String description;
-
-    private String image;
-
-    private Float price;
-
-    private Integer duration;
-
-    private Integer stock;
+    private String imageName;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -48,44 +40,12 @@ public class Products {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
+    public String getImageName() {
+        return imageName;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public Float getPrice() {
-        return price;
-    }
-
-    public void setPrice(Float price) {
-        this.price = price;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
+    public void setImageName(String image) {
+        this.imageName = image;
     }
 
     public Date getCreatedAt() {

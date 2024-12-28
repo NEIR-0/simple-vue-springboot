@@ -25,7 +25,12 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Homepage
+    component: Etalase
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
   },
   {
     path: '/register',
@@ -33,9 +38,14 @@ const routes = [
     component: Register
   },
   {
-    path: '/login',
-    name: 'Login',
-    component: Login
+    path: '/about',
+    name: 'about',
+    component: About
+  },
+  {
+    path: '/wallet',
+    name: 'Wallet',
+    component: Wallet
   },
   {
     path: '/testmsg',
@@ -53,21 +63,6 @@ const routes = [
         name: 'dashboard',
         component: Dashboard
       },
-      {
-        path: 'about',
-        name: 'about',
-        component: About
-      },
-      {
-        path: 'wallet',
-        name: 'wallet',
-        component: Wallet
-      },
-      {
-        path: 'etalase',
-        name: 'etalase',
-        component: Etalase
-      }
     ]
   },
   // admin
