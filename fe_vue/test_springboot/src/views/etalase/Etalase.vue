@@ -11,10 +11,6 @@
               <CardProducts :products="product" :onBuy="createTransactionsAndBlockchain" :isWalletConnected="isWalletConnected" :connectWallets="connectWallets" />
             </div>
           </div>
-    
-          <!-- <ul v-if="transactions?.length > 0" class="mt-10">
-            <li v-for="transaction in transactions">{{transaction?.id}} {{transaction?.status}}</li>
-          </ul> -->
         </div>
       </div>
       <div class="h-fit w-[28%] bg-[#EAE3D8] absolute right-5 top-36 flex items-center justify-center p-5 rounded-md">
@@ -23,6 +19,9 @@
         </div>
       </div>
     </div>
+
+    <!-- modal -->
+    <ModalsContainer/>
 </template>
 
 <script>
@@ -31,10 +30,14 @@ import { ethers } from "ethers";
 import WebSocketService from '../../services/WebSocketService';
 import CardProducts from '../../components/CardProducts.vue'
 import apiMethods from '../../services/apiMothods';
+import { ModalsContainer, useModal } from 'vue-final-modal'
+import Modal from '../../components/Modal.vue'
 
 export default {
   components: {
     CardProducts,
+    Modal,
+    ModalsContainer
   },
   data() {
     return {
@@ -45,18 +48,25 @@ export default {
       pageSize: 10,
       searchQuery: '',
       isWalletConnected: false,
+      tempAddress: false,
+      responseMessage: '',
+      titleModal: '',
     };
   },
-  methods: {
-    async fetchTransactions() {
-      try {
-        const data = await apiMethods.getData("/transaction");
-        this.transactions = data;
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    },
 
+  methods: {
+    openModal() {
+      const { open, close } = useModal({
+        component: Modal,
+        attrs: {
+          title: this.titleModal,
+          responseMessage: this.responseMessage,
+          isShowButton: true
+        },
+      });
+      open()
+    },
+    
     async fetchProducts(query = '') {
       try {
         const params = {
@@ -76,7 +86,7 @@ export default {
     async updateTransactions(hash = '', id = null) {
       try {
         const body = {
-          transactionId: id,
+          id,
           hash,
           status: "success",
         }
@@ -115,16 +125,34 @@ export default {
 
     async createTransactions(data) {
       try {
-        const body = {
-          des: data.description,
-          price: data.price,
-          status: "pending",
+        // Validate wallet address
+        if (this.tempAddress === "") {
+          await this.connectWallets(); // Reconnect if tempAddress is empty
         }
-        const data = await apiMethods.postData("/transaction/create", body);
-        this.updateTransactionsRealTime();
-        return data;
+
+        const accounts = await ethereum.request({ method: "eth_accounts" });
+        if (accounts.length > 0 && this.tempAddress !== accounts[0]) {
+          this.tempAddress = accounts[0]; // Update tempAddress with the current address
+          console.log("Address updated to: ", this.tempAddress);
+        }
+
+        if (this.tempAddress) {
+          const body = {
+            description: `${data?.title} - ${data?.duration} Days`,
+            price: data?.price,
+            address_signed: this.tempAddress,
+            status: "pending",
+          };
+          console.log("address_signed: ", body.address_signed, ">>><<<");
+
+          const response = await apiMethods.postData("/transaction/create", body);
+          this.updateTransactionsRealTime();
+          return response;
+        } else {
+          throw new Error("Wallet not connected");
+        }
       } catch (error) {
-        console.log(error, "!!!!!!!!!!!!!!!!!");        
+        console.log("Error creating transaction: ", error);
       }
     },
 
@@ -133,7 +161,19 @@ export default {
         const local = await this.createTransactions(data);
         console.log("local: ", local);
         if(local){
-          const blockchain = await this.createBlockchain(data.description, data.price);
+
+          const now = new Date();
+          const day = now.getDate().toString().padStart(2, '0'); // Day of the month
+          const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Month (0-11, so we add 1)
+          const year = now.getFullYear(); // Year
+          const hours = now.getHours().toString().padStart(2, '0'); // Hours (24-hour format)
+          const minutes = now.getMinutes().toString().padStart(2, '0'); // Minutes
+          const seconds = now.getSeconds().toString().padStart(2, '0'); // Seconds
+
+          // Format: "DD/MM/YYYY HH:MM:SS"
+          const formattedDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+          const storeData = `${data.description}, Date: ${formattedDate}`;
+          const blockchain = await this.createBlockchain(storeData, data.price);
           console.log("blockchain: ", blockchain);
   
           if(blockchain && blockchain?.hash && local && local?.transactionId) {
@@ -141,7 +181,9 @@ export default {
             const id = local?.transactionId;
             const response = await this.updateTransactions(hash, id);
             if(response){
-              console.log(response?.msg, "????");
+              this.responseMessage = response?.msg;
+              this.titleModal = "Your Transaction Was Successful !!";
+              this.openModal();
               this.updateTransactionsRealTime();
             }
           }
@@ -154,18 +196,17 @@ export default {
     async connectWallets() {
       try {
         if (typeof window.ethereum !== "undefined") {
-          await ethereum.request({ method: "eth_requestAccounts" });
-          const prov = new ethers.providers.Web3Provider(window.ethereum);
-          const sig = await prov.getSigner();
-          const address = await sig.getAddress();
-          if(address){
-            this.isWalletConnected = true
+          const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+          if (accounts.length > 0) {
+            this.tempAddress = accounts[0];
+            this.isWalletConnected = true;
+            console.log("Wallet connected: ", this.tempAddress);
           }
         } else {
-          console.log("Ethereum wallet is not connected. !!!!!");
+          console.log("Ethereum wallet is not connected.");
         }
       } catch (error) {
-        console.log(error, "!!!!!!!!!!!!!!!!!");        
+        console.log("Error connecting wallet: ", error);
       }
     },
 
@@ -184,9 +225,23 @@ export default {
   },
 
   mounted() {
-    this.fetchTransactions()
     this.fetchProducts()
     WebSocketService.responseUpdateTransactionsRealTime(this.RealTimeTransactions);
+
+    // Monitor wallet address changes
+    if (typeof window.ethereum !== "undefined") {
+      window.ethereum.on("accountsChanged", (accounts) => {
+        if (accounts.length > 0) {
+          this.tempAddress = accounts[0]; // Update tempAddress with the new address
+          console.log("Wallet address changed to: ", this.tempAddress);
+          this.isWalletConnected = true;
+        } else {
+          this.tempAddress = "";
+          this.isWalletConnected = false;
+          console.log("No wallet connected.");
+        }
+      });
+    }
   },
 
   beforeDestroy() {

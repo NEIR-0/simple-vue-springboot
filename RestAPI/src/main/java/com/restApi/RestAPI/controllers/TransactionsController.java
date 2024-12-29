@@ -1,10 +1,8 @@
 package com.restApi.RestAPI.controllers;
 
-import com.restApi.RestAPI.dto.inputUserDTO.TransactionDTOUserInput;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.model.transaction.Transactions;
 import com.restApi.RestAPI.services.TransactionsService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -25,18 +23,23 @@ public class TransactionsController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseDTOOutput> createTransactions(@RequestBody TransactionDTOUserInput inputUser, HttpServletRequest request) {
-        ResponseDTOOutput status =  transactionsService.createTransactions(inputUser, request);
-        if ("success".equals(status.getStatus())) {
-            return ResponseEntity.ok(status);
+    public ResponseEntity<ResponseDTOOutput> createTransactions(
+            @RequestBody Transactions inputUser
+    ) {
+        ResponseDTOOutput responseStatus = new ResponseDTOOutput();
+        ResponseDTOOutput response =  transactionsService.createTransactions(inputUser);
+        if ("success".equals(response.getStatus())) {
+            return ResponseEntity.ok(response);
         }else {
-            return ResponseEntity.badRequest().body(status);
+            responseStatus.setMsg("failed due create transactions");
+            responseStatus.setStatus("failed");
+            return ResponseEntity.badRequest().body(responseStatus);
         }
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ResponseDTOOutput> updateTransactions(@RequestBody TransactionDTOUserInput inputUser, HttpServletRequest request) {
-        ResponseDTOOutput status =  transactionsService.updateTransactions(inputUser, request);
+    public ResponseEntity<ResponseDTOOutput> updateTransactions(@RequestBody Transactions inputUser) {
+        ResponseDTOOutput status =  transactionsService.updateTransactions(inputUser);
         if ("success".equals(status.getStatus())) {
             return ResponseEntity.ok(status);
         }else {
