@@ -12,11 +12,7 @@ public class Transactions {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Users user;
-
-    private String des;
+    private String description;
 
     private Float price;
 
@@ -24,9 +20,11 @@ public class Transactions {
 
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "receiver_id")
-    private Users receiver;
+    private String address_signed;
+
+    private String address_receiver;
+
+    private String code_subscription;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", updatable = false)
@@ -40,17 +38,6 @@ public class Transactions {
     public Transactions() {
     }
 
-    public Transactions(Users user, String des, Float price, String hash, String status, Users receiver) {
-        this.user = user;
-        this.des = des;
-        this.price = price;
-        this.hash = hash;
-        this.status = status;
-        this.receiver = receiver;
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
-    }
-
     // Getter & Setter
     public Long getId() {
         return id;
@@ -60,20 +47,12 @@ public class Transactions {
         this.id = id;
     }
 
-    public Users getUser() {
-        return user;
+    public String getDescription() {
+        return description;
     }
 
-    public void setUser(Users user) {
-        this.user = user;
-    }
-
-    public String getDes() {
-        return des;
-    }
-
-    public void setDes(String des) {
-        this.des = des;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Float getPrice() {
@@ -100,12 +79,28 @@ public class Transactions {
         this.status = status;
     }
 
-    public Users getReceiver() {
-        return receiver;
+    public String getCode_Subscription() {
+        return code_subscription;
     }
 
-    public void setReceiver(Users receiver) {
-        this.receiver = receiver;
+    public void setCode_Subscription(String code_subscription) {
+        this.code_subscription = code_subscription;
+    }
+
+    public String getAddress_signed() {
+        return address_signed;
+    }
+
+    public void setAddress_signed(String address_signed) {
+        this.address_signed = address_signed;
+    }
+
+    public String getAddress_Receiver() {
+        return address_receiver;
+    }
+
+    public void setAddress_Receiver(String address_receiver) {
+        this.address_receiver = address_receiver;
     }
 
     public Date getCreatedAt() {

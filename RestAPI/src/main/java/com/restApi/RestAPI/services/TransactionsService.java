@@ -1,18 +1,16 @@
 package com.restApi.RestAPI.services;
 
 import com.restApi.RestAPI.config.JwtUtil;
-import com.restApi.RestAPI.dto.inputUserDTO.TransactionDTOUserInput;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
-import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.model.transaction.Transactions;
 import com.restApi.RestAPI.repository.TransactionsRepository;
 import com.restApi.RestAPI.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class TransactionsService {
@@ -29,39 +27,25 @@ public class TransactionsService {
         return transactionsRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
-    public ResponseDTOOutput createTransactions(TransactionDTOUserInput inputUser, HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
+    public ResponseDTOOutput createTransactions(Transactions inputUser) {
         ResponseDTOOutput responseStatus = new ResponseDTOOutput();
+        Transactions transaction = new Transactions();
+        transaction.setDescription(inputUser.getDescription());
+        transaction.setPrice(inputUser.getPrice());
+        transaction.setAddress_signed(inputUser.getAddress_signed());
+        transaction.setStatus(inputUser.getStatus());
+        Transactions newTransactions = transactionsRepository.save(transaction);
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            Long id = jwtUtil.getIdFromToken(token);
-
-            Users user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-            Transactions transaction = new Transactions();
-            transaction.setUser(user);
-            transaction.setDes(inputUser.getDes());
-            transaction.setPrice(inputUser.getPrice());
-            transaction.setHash(inputUser.getHash());
-            transaction.setStatus(inputUser.getStatus());
-            Transactions newTransactions = transactionsRepository.save(transaction);
-
-            responseStatus.setTransactionId(newTransactions.getId());
-            responseStatus.setMsg("transactions created successfully");
-            responseStatus.setStatus("success");
-            return responseStatus;
-        }else{
-            responseStatus.setMsg("failed due create transactions");
-            responseStatus.setStatus("failed");
-            return responseStatus;
-        }
+        responseStatus.setTransactionId(newTransactions.getId());
+        responseStatus.setMsg("transactions created successfully");
+        responseStatus.setStatus("success");
+        return responseStatus;
     }
 
-    public ResponseDTOOutput updateTransactions(TransactionDTOUserInput inputUser, HttpServletRequest request) {
+    public ResponseDTOOutput updateTransactions(Transactions inputUser) {
         ResponseDTOOutput responseStatus = new ResponseDTOOutput();
-        Long TransactionId = inputUser.getTransactionId();
+        Long TransactionId = inputUser.getId();
+        System.out.println("TransactionId: " + TransactionId);
 
         if (TransactionId == null || inputUser.getHash() == null || inputUser.getStatus() == null) {
             responseStatus.setStatus("failed");
@@ -74,10 +58,32 @@ public class TransactionsService {
 
         transaction.setHash(inputUser.getHash());
         transaction.setStatus(inputUser.getStatus());
+
+        String CodeSub = generateCode();
+        transaction.setCode_Subscription(CodeSub);
         transactionsRepository.save(transaction);
 
         responseStatus.setStatus("success");
-        responseStatus.setMsg("transactions updated successfully");
+        responseStatus.setMsg(CodeSub);
         return responseStatus;
+    }
+
+    private static String generateCode() {
+        int groupLength = 4;
+        int totalGroups = 3;
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder code = new StringBuilder();
+
+        for (int i = 0; i < totalGroups; i++) {
+            for (int j = 0; j < groupLength; j++) {
+                char randomChar = characters.charAt(random.nextInt(characters.length()));
+                code.append(randomChar);
+            }
+            if (i < totalGroups - 1) {
+                code.append("-");
+            }
+        }
+        return code.toString();
     }
 }
