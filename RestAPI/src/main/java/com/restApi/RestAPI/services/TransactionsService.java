@@ -1,6 +1,6 @@
 package com.restApi.RestAPI.services;
 
-import com.restApi.RestAPI.config.JwtUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.model.transaction.Transactions;
 import com.restApi.RestAPI.repository.TransactionsRepository;
@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -21,7 +22,7 @@ public class TransactionsService {
     private UserRepository userRepository;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private RabbitMQSenderService rabbitMQSenderService;
 
     public List<Transactions> findAll() {
         return transactionsRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -29,16 +30,26 @@ public class TransactionsService {
 
     public ResponseDTOOutput createTransactions(Transactions inputUser) {
         ResponseDTOOutput responseStatus = new ResponseDTOOutput();
+
+        // Membuat transaksi baru di database
         Transactions transaction = new Transactions();
         transaction.setDescription(inputUser.getDescription());
         transaction.setPrice(inputUser.getPrice());
         transaction.setAddress_signed(inputUser.getAddress_signed());
         transaction.setStatus(inputUser.getStatus());
-        Transactions newTransactions = transactionsRepository.save(transaction);
 
-        responseStatus.setTransactionId(newTransactions.getId());
-        responseStatus.setMsg("transactions created successfully");
-        responseStatus.setStatus("success");
+        try {
+            // Mengirim transaksi ke RabbitMQ
+            Long transactionId = rabbitMQSenderService.sendMessageForTransactions(transaction);
+            responseStatus.setTransactionId(transactionId);
+            responseStatus.setMsg("Transaction is being processed.");
+            responseStatus.setStatus("success");
+        } catch (JsonProcessingException e) {
+            System.out.println("Error RabbitMQ Transaction: " + e.getMessage());
+            responseStatus.setMsg("Failed to process transaction.");
+            responseStatus.setStatus("failed");
+        }
+
         return responseStatus;
     }
 

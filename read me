@@ -1,11 +1,25 @@
 #BE:
+## SPRING BOOT
 1. pakai intellij IDEA
 2. cuman di file main bisa play button nya kayak di flutter
 3. pakai spring boot be nya
 4. application.properties benerin,
+
+## RABBITMQ
+1. install: brew install rabbitmq
+2. jalankan: brew services start rabbitmq
+3. cek status: brew services list
+4. stop server: brew services stop rabbitmq
+
+FYI: RABBITMQ start on http://localhost:15672
++ RABBITMQ better di pakai untuk store db doang / hit third-api yang gak ada balikannya. jadi gak wise di pakai untuk case: create item -> lalu return new created item nya
 
 #FE:
 pakai vscode
 
 #hardhat
 1. ethers js version 5
+2. npx hardhat compile  (buat compile)
+3. npx hardhat node  (jalanin node di local)
+4. npx hardhat ignition deploy ./ignition/modules/nama_file.js --network localhost  (buat deploy di local)
+5. npx hardhat run scripts/nama_file.js --network localhost (jalanin intraksi code ke smart contract nya)
