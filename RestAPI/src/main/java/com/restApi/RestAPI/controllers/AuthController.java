@@ -1,7 +1,9 @@
 package com.restApi.RestAPI.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.model.auth.Users;
+import com.restApi.RestAPI.services.RabbitMQSenderService;
 import com.restApi.RestAPI.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,9 @@ import java.util.Objects;
 public class AuthController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RabbitMQSenderService rabbitMQSenderService;
 
     @PostMapping("/register")
     public ResponseEntity<ResponseDTOOutput> createUser(@Valid @RequestBody Users inputUser, BindingResult result) {
@@ -34,12 +39,17 @@ public class AuthController {
         }
         ResponseDTOOutput checkEmail = userService.emailChecker(inputUser.getEmail());
         if (!Objects.equals(checkEmail.getStatus(), "failed")) {
-            userService.createUser(inputUser);
+            try {
+                rabbitMQSenderService.sendMessageForRegisterUser(inputUser);
+            } catch (JsonProcessingException e) {
+                System.out.println("Error RabbitMQ Transaction: " + e.getMessage());
+                checkEmail.setMsg("Failed to process transaction.");
+                checkEmail.setStatus("failed");
+            }
             return ResponseEntity.ok(checkEmail);
         } else {
             return ResponseEntity.badRequest().body(checkEmail);
         }
-
     }
 
     @PostMapping("/login")
