@@ -11,6 +11,7 @@ import Etalase from './views/etalase/etalase.vue'
 import CreateProducts from './views/admin/CreateProducts.vue'
 import ListProducts from './views/admin/ListProducts.vue'
 import UpdateProducts from './views/admin/UpdateProducts.vue'
+import CustomerService from './views/admin/CustomerService.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
@@ -69,7 +70,7 @@ const routes = [
   {
     path: '/admin',
     name: 'admin',
-    // beforeEnter: auth, 
+    beforeEnter: auth, 
     children: [
       {
         path: '',
@@ -85,6 +86,11 @@ const routes = [
         path: 'update-product/:id',
         name: 'update-product',
         component: UpdateProducts
+      },
+      {
+        path: 'customer',
+        name: 'customer',
+        component: CustomerService
       }
     ]
   },

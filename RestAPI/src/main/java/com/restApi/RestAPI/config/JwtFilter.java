@@ -7,6 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,6 +16,9 @@ import java.io.IOException;
 @Component
 public class JwtFilter implements Filter {
     private final String secretKey = "{jwt.secret}";
+
+    @Autowired
+    JwtUtil jwtUtil;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -52,10 +56,9 @@ public class JwtFilter implements Filter {
 
             try {
                 // Verifikasi token
-                Algorithm algorithm = Algorithm.HMAC256(secretKey);
-                System.out.println("secretKey: " + secretKey + ">>>>>>>>>>>");
                 System.out.println("token: " + token[1] + ">>>>>>>>>>>");
-                DecodedJWT decodedJWT = JWT.require(algorithm).build().verify(token[1]);
+                DecodedJWT decodedJWT = jwtUtil.verifyToken(token[1]);
+                System.out.println("success verify >>>>>>>>>>>");
 
                 //  decodedJWT.getClaims().forEach((key, value) -> {
                 //      System.out.println(key + ": " + value.asString());
@@ -66,6 +69,7 @@ public class JwtFilter implements Filter {
                 request.setAttribute("userRole", userRole);
             } catch (JWTVerificationException e) {
                 // Jika token tidak valid
+                System.out.println("unsuccess verify >>>>>>>>>>>");
                 httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 httpResponse.getWriter().write("Invalid or expired token");
                 return;

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.model.transaction.Transactions;
 import com.restApi.RestAPI.repository.TransactionsRepository;
-import com.restApi.RestAPI.repository.UserRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,7 @@ public class RabbitMQReceiverService {
     private TransactionsRepository transactionsRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -53,7 +52,7 @@ public class RabbitMQReceiverService {
         }
     }
     private void processRegisterUser(Users inputUser) {
-        Users savedTransaction = userRepository.save(inputUser);
-        System.out.println("Register user processed id: " + savedTransaction.getId());
+        String savedTransaction = userService.createUser(inputUser);
+        System.out.println(savedTransaction);
     }
 }
