@@ -42,7 +42,7 @@ export default {
         this.products = response;
         this.totalPages = Math.ceil(response.length / this.pageSize);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error send message data:', error);
       }
     },
 
@@ -52,7 +52,7 @@ export default {
         const response = await apiMethods.deleteData(endpoint);
         this.updateDataDeleteProducts();
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error send message data:', error);
       }
     },
 
@@ -65,7 +65,6 @@ export default {
     },
 
     GetDataUpdateProducts(newMessage) {
-      console.log(newMessage, "?????");
       this.products = newMessage
     },
   },

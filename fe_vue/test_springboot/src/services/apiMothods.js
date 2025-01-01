@@ -28,6 +28,15 @@ const getData = async (endpoint, params) => {
   }
 };
 
+const getDataById = async (endpoint, params) => {
+  try {
+    const { data } = await axiosInstanceBasic.get(endpoint, { params });
+    return data
+  } catch (error) {
+    handleError(error);
+  }
+};
+
 const postData = async (endpoint, payload) => {
   try {
     const { data } = await axiosInstanceBasic.post(endpoint, payload);
@@ -76,7 +85,11 @@ const deleteData = async (endpoint) => {
 const handleError = (error) => {
   if (error.response) {
     console.error('API Error:', error.response.status, error.response.data);
-    throw new Error(error.response.data.message || 'API Error');
+    if(error.response.data === "Invalid or expired token"){
+      throw new Error(error.response.data);
+    }else{
+      throw new Error(error.response.data.message || 'API Error');
+    }
   } else if (error.request) {
     console.error('No response received:', error.request);
     throw new Error('No response from server');
@@ -88,9 +101,10 @@ const handleError = (error) => {
 
 export default {
   getData,
+  getDataById,
   postData,
   putData,
   deleteData,
   postDataFormData,
-  putDataFormData
+  putDataFormData,
 };

@@ -1,5 +1,5 @@
 <template>
-    <div class="h-screen overflow-hidden w-full flex flex-col items-start justify-center bgEtalase">
+    <div class="h-screen overflow-hidden w-full flex flex-col items-start justify-center relative bgEtalase">
       <div class="text-white w-full h-full py-14 space-y-2 px-5">
         <div class="">
           <h1 class="font-bold text-white text-3xl capitalize">choose your products</h1>
@@ -13,10 +13,25 @@
           </div>
         </div>
       </div>
-      <div class="h-fit w-[28%] bg-[#EAE3D8] absolute right-5 top-36 flex items-center justify-center p-5 rounded-md">
-        <div class="w-full">
-          <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="Search..." name="search" id="search">
+      <div class="h-fit w-[28%] absolute right-5 top-36 flex flex-col items-center justify-center space-y-4">
+        <div class="h-fit w-full bg-[#EAE3D8] flex items-center justify-center p-5 rounded-md">
+          <div class="w-full">
+            <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="Search..." name="search" id="search">
+          </div>
         </div>
+        <div class="w-full flex justify-end">
+          <button @click="showChatUser" class="h-10 p-5 flex items-center justify-center rounded-md font-semibold text-slate-800 bg-[#ffde09] hover:bg-[#ffe74e] duration-300 ease-in-out">Chat customer service</button>
+        </div>
+      </div>
+
+      <!-- chat -->
+      <div v-if="showChatBox" class="absolute bottom-5 right-10 w-fit h-fit">
+        <ChatBox 
+          :messages="messages" 
+          :sendMessageUser="sendMessageUser" 
+          :newMessage="newMessage" 
+          @update:newMessage="newMessage = $event"
+        />
       </div>
     </div>
 
@@ -32,12 +47,14 @@ import CardProducts from '../../components/CardProducts.vue'
 import apiMethods from '../../services/apiMothods';
 import { ModalsContainer, useModal } from 'vue-final-modal'
 import Modal from '../../components/Modal.vue'
+import ChatBox from "../../components/chatBox.vue";
 
 export default {
   components: {
     CardProducts,
     Modal,
-    ModalsContainer
+    ModalsContainer,
+    ChatBox
   },
   data() {
     return {
@@ -51,6 +68,9 @@ export default {
       tempAddress: false,
       responseMessage: '',
       titleModal: '',
+      showChatBox: false,
+      messages: [],
+      newMessage: '',
     };
   },
 
@@ -66,6 +86,17 @@ export default {
       });
       open()
     },
+
+    async showChatUser() {
+      this.showChatBox = !this.showChatBox
+      try {
+        const data = await apiMethods.getData("/message");
+        this.messages = data
+        return data;
+      } catch (error) {
+        console.error('Error send message data:', error);
+      }
+    },
     
     async fetchProducts(query = '') {
       try {
@@ -79,7 +110,7 @@ export default {
         this.products = data;
         this.totalPages = Math.ceil(data.length / this.pageSize);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error send message data:', error);
       }
     },
 
@@ -93,7 +124,7 @@ export default {
         const data = await apiMethods.putData("/transaction/update", body);
         return data;
       } catch (error) {
-        console.log(error, "!!!!!!!!!!!!!!!!!");        
+        console.error('Error send message data:', error);
       }
     },
 
@@ -119,7 +150,7 @@ export default {
           console.log("Ethereum wallet is not connected. !!!!!");
         }
       } catch (error) {
-        console.log(error, "!!!!!!!!!!!!!!!!!");        
+        console.error('Error send message data:', error);   
       }
     },
 
@@ -152,7 +183,7 @@ export default {
           throw new Error("Wallet not connected");
         }
       } catch (error) {
-        console.log("Error creating transaction: ", error);
+        console.error('Error send message data:', error);
       }
     },
 
@@ -189,7 +220,7 @@ export default {
           }
         }
       } catch (error) {
-        console.log(error, "!!!!!!!!!!!!!!!!!");
+        console.error('Error send message data:', error);
       }
     },
 
@@ -206,8 +237,38 @@ export default {
           console.log("Ethereum wallet is not connected.");
         }
       } catch (error) {
-        console.log("Error connecting wallet: ", error);
+        console.error('Error send message data:', error);
       }
+    },
+
+    async sendMessageUser() {      
+      if (this.newMessage.trim() === "") return;
+      try {
+        const body = {
+            content: this.newMessage,
+            sendTo: this.currentUserId
+        }
+        console.log(body);
+        const response = await apiMethods.postData("/message/create", body);
+
+        const payload = {};
+        if (response) {
+          const [senderId, reciverId] = response?.msg.split('-');
+          payload.senderId = senderId;
+          payload.reciverId = reciverId;
+          this.SendRealTimeMessager(payload);
+        }
+        this.newMessage = "";
+              
+      } catch (error) {
+          console.error('Error send message data:', error);
+      }
+    },
+    RealTimeMessager(newMessage) {
+      this.messages = newMessage;
+    },
+    SendRealTimeMessager(payload) {
+      WebSocketService.UpdateSendMessageRealTime(payload);
     },
 
     onSearch() {
@@ -218,15 +279,11 @@ export default {
     updateTransactionsRealTime() {
         WebSocketService.updateTransactionsRealTime();
     },
-
-    RealTimeTransactions(newMessage) {
-      this.transactions = (newMessage);
-    },
   },
 
   mounted() {
     this.fetchProducts()
-    WebSocketService.responseUpdateTransactionsRealTime(this.RealTimeTransactions);
+    WebSocketService.responseSendMessageRealTime(this.RealTimeMessager);
 
     // Monitor wallet address changes
     if (typeof window.ethereum !== "undefined") {
