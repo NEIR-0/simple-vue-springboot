@@ -3,8 +3,8 @@ package com.restApi.RestAPI.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restApi.RestAPI.model.auth.Users;
+import com.restApi.RestAPI.model.message.Messages;
 import com.restApi.RestAPI.model.transaction.Transactions;
-import com.restApi.RestAPI.repository.TransactionsRepository;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,9 +16,6 @@ public class RabbitMQSenderService {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private TransactionsRepository transactionsRepository;
 
     public Long sendMessageForTransactions(Transactions transaction) throws JsonProcessingException {
         System.out.println("Transaction message sent to RabbitMQ: " + transaction);
@@ -39,5 +36,11 @@ public class RabbitMQSenderService {
         System.out.println("RegisterUser message sent to RabbitMQ: " + inputUser);
         String registerUserJson = objectMapper.writeValueAsString(inputUser);
         amqpTemplate.convertAndSend("myExchange", "user.routing.key", registerUserJson);
+    }
+
+    public String sendMessageForCreateMessage(Messages inputUser) throws JsonProcessingException {
+        System.out.println("CreateMessage message sent to RabbitMQ: " + inputUser);
+        String createMessageJson = objectMapper.writeValueAsString(inputUser);
+        return (String) amqpTemplate.convertSendAndReceive("myExchange", "message.routing.key", createMessageJson);
     }
 }
