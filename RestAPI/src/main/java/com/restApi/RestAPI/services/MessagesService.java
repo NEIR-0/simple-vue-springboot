@@ -1,5 +1,6 @@
 package com.restApi.RestAPI.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.restApi.RestAPI.dto.MessageDTO;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.model.auth.Users;
@@ -20,6 +21,9 @@ public class MessagesService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    private RabbitMQSenderService rabbitMQSenderService;
 
     public List<Messages> getAllMessagesByUserId(Long userId, String userRole) {
         if (!Objects.equals(userRole, "admin")) {
@@ -71,10 +75,15 @@ public class MessagesService {
             responseStatus.setMsg(admin.get().getId() + "-" + user.get().getId());
         }
 
-        messagesRepository.save(newMessages);
-
-        responseStatus.setStatus("success");
-
+        try {
+            // Mengirim transaksi ke RabbitMQ
+            String response = rabbitMQSenderService.sendMessageForCreateMessage(newMessages);
+            responseStatus.setStatus(response);
+        } catch (JsonProcessingException e) {
+            System.out.println("Error RabbitMQ Create Message: " + e.getMessage());
+            responseStatus.setMsg("Failed to process Create Message.");
+            responseStatus.setStatus("failed");
+        }
         return responseStatus;
     }
 }

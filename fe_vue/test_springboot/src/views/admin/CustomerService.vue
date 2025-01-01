@@ -68,8 +68,6 @@ export default {
         changeUser(user) {
             this.currentUserId = user?.id;
             this.currentEmail = user?.email;
-            this.newMessageNotification = false;
-
             // Menghapus userId yang dipilih dari userNewMessages
             this.userNewMessages = this.userNewMessages.filter(id => id !== user.id);
             // Set notifikasi ke false setelah memilih user
@@ -112,12 +110,16 @@ export default {
 
         RealTimeMessager(newMessage) {
             // Cek apakah pesan baru datang dari pengguna yang berbeda
-            if (newMessage.senderId !== this.currentUserId) {
-                this.newMessageNotification = true; // Tampilkan notifikasi jika dari user lain
+            if (this.currentUserId !== newMessage[0]?.senderId?.id) {
+                this.newMessageNotification = true;
             }
             let check = this.userNewMessages.includes(newMessage[0]?.senderId?.id)
-            if(!check){
+            if(!check && this.currentUserId !== newMessage[0]?.senderId ?.id){
                 this.userNewMessages.push(newMessage[0]?.senderId?.id)
+            }
+            this.currentUserId === newMessage[0]?.senderId ?.id
+            if(this.currentUserId === newMessage[0]?.senderId ?.id){
+                this.messages = newMessage
             }
         },
 
