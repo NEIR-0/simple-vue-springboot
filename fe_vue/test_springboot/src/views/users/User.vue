@@ -65,7 +65,7 @@ export default {
         this.totalPages = Math.ceil(data.length / this.pageSize);
       } catch (error) {
         console.error('Error send message data:', error);
-        if (error?.message) {
+        if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
       }

@@ -35,7 +35,7 @@ public class UserController {
             // Log atau gunakan email dan ID
             System.out.println("User login dengan email: " + email + " dan ID: " + id);
         }
-        return userService.getAllUsers(page, size, search);
+        return userService.getAllUsers(search, page, size);
     }
 
     @GetMapping("/without-admin")
@@ -45,6 +45,6 @@ public class UserController {
             @RequestParam(value = "search", required = false) String search,
             HttpServletRequest request
     ) {
-        return userService.getAllUsersWithoutAdmin(page, size, search);
+        return userService.getAllUsersWithoutAdmin(search, page, size);
     }
 }

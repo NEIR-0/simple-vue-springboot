@@ -1,7 +1,14 @@
 <template>
-    <div class="h-screen w-full flex items-center justify-center py-14 px-5 relative">
-        <div class="w-1/2 h-screen">
-            <h1 class="text-3xl font-semibold">Customer Services</h1>
+    <div class="h-screen w-full flex flex-col items-center justify-center py-14 px-5 relative">
+        <div class="w-1/2 h-screen space-y-4">
+            <h1 class="text-3xl font-semibold text-center">Customer Services</h1>
+            <div class="w-full flex items-center justify-center">
+                <div class="h-fit w-1/2 bg-[#EAE3D8] flex items-center justify-center p-5 rounded-md">
+                    <div class="w-full">
+                        <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="Search by email....." name="search" id="search">
+                    </div>
+                </div>
+            </div>
             <div class="w-full h-fit flex flex-col items-center justify-center mt-10 space-y-2">
                 <div v-for="user in sortedUsers" :key="user.id" class="w-full h-fit flex items-center justify-center flex-col space-y-4">
                     <button 
@@ -55,16 +62,29 @@ export default {
             currentEmail: "",
             userNewMessages: [],
             showChatBox: false,
+            searchQuery: "",
+            currentPage: 0,
+            totalPages: 0,
+            pageSize: 10,
         }
     },
     methods: {
-        async getAllUsers() {
+        onSearch() {
+            this.currentPage = 0;
+            this.getAllUsers(this.searchQuery);
+        },
+        async getAllUsers(query = "") {
             try {
-                const response = await apiMethods.getData("/users/without-admin");
+                const params = {
+                    page: this.currentPage,
+                    size: this.pageSize,
+                    search: query,
+                }
+                const response = await apiMethods.getData("/users/without-admin", params);
                 this.users = response;
             } catch (error) {
                 console.error('Error send message data:', error);
-                if (error?.message) {
+                if (error?.message === "Invalid or expired token") {
                 this.$router.push('/login')
                 }
             }
@@ -92,7 +112,7 @@ export default {
                 this.currentUserMessages = response;
             } catch (error) {
                 console.error('Error send message data:', error);
-                if (error?.message) {
+                if (error?.message === "Invalid or expired token") {
                 this.$router.push('/login')
                 }
             }
@@ -117,7 +137,7 @@ export default {
                 this.newMessage = "";
             } catch (error) {
                 console.error('Error send message data:', error);
-                if (error?.message) {
+                if (error?.message === "Invalid or expired token") {
                 this.$router.push('/login')
                 }
             }
