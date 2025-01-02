@@ -16,19 +16,20 @@
         </div>
 
         <!-- chat -->
-        <div class="absolute bottom-5 right-10 w-fit h-fit">
+        <div v-if="showChatBox" class="absolute bottom-5 right-10 w-fit h-fit">
             <ChatBox 
                 :messages="messages" 
                 :sendMessageUser="sendMessageUser" 
                 :newMessage="newMessage" 
                 :isAdmin="true"
                 :currentEmail="currentEmail"
+                :closeChatUser="closeChatUser"
                 @update:newMessage="newMessage = $event"
             />
         </div>
 
         <!-- Notification Badge -->
-        <div v-if="newMessageNotification" class="absolute top-5 right-10 bg-red-500 text-white p-2 rounded-full">
+        <div v-if="newMessageNotification" class="absolute top-14 right-10 bg-red-500 text-white p-2 rounded-full">
             New message from user!
         </div>
     </div>
@@ -52,13 +53,14 @@ export default {
             newMessageNotification: false,
             currentUserMessages: [],
             currentEmail: "",
-            userNewMessages: []
+            userNewMessages: [],
+            showChatBox: false,
         }
     },
     methods: {
         async getAllUsers() {
             try {
-                const response = await apiMethods.getData("/users");
+                const response = await apiMethods.getData("/users/without-admin");
                 this.users = response;
             } catch (error) {
                 console.error('Error send message data:', error);
@@ -75,7 +77,12 @@ export default {
             this.userNewMessages = this.userNewMessages.filter(id => id !== user.id);
             // Set notifikasi ke false setelah memilih user
             this.newMessageNotification = false;
+            this.showChatBox = true
             this.getAllMessageById();
+        },
+
+        closeChatUser() {
+            this.showChatBox = !this.showChatBox
         },
 
         async getAllMessageById() {

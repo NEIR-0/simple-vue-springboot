@@ -19,7 +19,7 @@
             <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="Search..." name="search" id="search">
           </div>
         </div>
-        <div v-if="token && role == 'user'" class="w-full flex justify-end">
+        <div v-if="token && role == 'user' && !showChatBox" class="w-full flex justify-end">
           <button @click="showChatUser" class="h-10 p-5 flex items-center justify-center rounded-md font-semibold text-slate-800 bg-[#ffde09] hover:bg-[#ffe74e] duration-300 ease-in-out">Chat customer service</button>
         </div>
       </div>
@@ -29,7 +29,8 @@
         <ChatBox 
           :messages="messages" 
           :sendMessageUser="sendMessageUser" 
-          :newMessage="newMessage" 
+          :newMessage="newMessage"
+          :closeChatUser="closeChatUser"
           @update:newMessage="newMessage = $event"
         />
       </div>
@@ -101,6 +102,10 @@ export default {
           this.$router.push('/login')
         }
       }
+    },
+
+    closeChatUser() {
+      this.showChatBox = !this.showChatBox
     },
     
     async fetchProducts(query = '') {

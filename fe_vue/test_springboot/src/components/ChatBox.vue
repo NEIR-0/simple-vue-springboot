@@ -1,9 +1,10 @@
 <template>
     <div class="w-[550px] h-[700px] shadow-lg border-4 border-slate-500 rounded-lg bg-white relative px-3 pt-3">
+      <button @click="closeChatUser" class="absolute top-2 right-5 text-xl text-slate-500 font-bold duration-300 ease-in-out hover:text-slate-800">X</button>
       <!-- chatbox -->
-    <div class="w-full h-10">
-        <h1>{{currentEmail ? currentEmail : "Admin"}}</h1>
-    </div>
+      <div class="w-full h-10 flex items-center justify-between">
+          <h1>{{currentEmail ? currentEmail : "Admin"}}</h1>
+      </div>
       <div 
         ref="chatBox" 
         class="w-full h-[84%] bg-gray-100 overflow-y-auto flex flex-col space-y-3 p-3"
@@ -61,6 +62,10 @@ export default {
             type: Boolean
         },
         sendMessageUser:{
+            type: Function,
+            required: true
+        },
+        closeChatUser:{
             type: Function,
             required: true
         },
