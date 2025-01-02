@@ -62,6 +62,12 @@ export default {
           console.log("Tx: ", tx, "????");
           console.log("Transaction Hash: ", tx.hash);
           await tx.wait();
+          this.$toast.open({
+            message: "Transaction Success",
+            type: 'success',
+            duration: 3000,
+            position: 'top-right'
+          });
         } else {
           console.log("Ethereum wallet is not connected. !!!!!");
         }
@@ -70,6 +76,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: "Something wrong with your wallet, please try again",
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
   },

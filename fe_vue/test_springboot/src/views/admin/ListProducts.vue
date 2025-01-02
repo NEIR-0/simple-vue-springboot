@@ -98,6 +98,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
 
@@ -106,11 +112,23 @@ export default {
         const endpoint = '/products/' + id;
         const response = await apiMethods.deleteData(endpoint);
         this.updateDataDeleteProducts();
+        this.$toast.open({
+          message: "Success Deleted Products",
+          type: 'success',
+          duration: 3000,
+          position: 'top-right'
+        });
       } catch (error) {
         console.error('Error send message data:', error);
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
 

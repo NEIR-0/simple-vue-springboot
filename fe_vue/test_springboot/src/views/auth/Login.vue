@@ -68,9 +68,20 @@ export default {
         this.email = ''
         this.password = ''
         
+        this.$toast.open({
+          message: "Login Success",
+          type: 'success',
+          duration: 3000,
+          position: 'top-right'
+        });
         this.$router.push('/')
       } catch (error) {
-        console.error('Error submitting data:', error)
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     }
   }
