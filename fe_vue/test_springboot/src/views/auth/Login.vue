@@ -68,7 +68,7 @@ export default {
         this.email = ''
         this.password = ''
         
-        this.$router.push('/dashboard')
+        this.$router.push('/')
       } catch (error) {
         console.error('Error submitting data:', error)
       }

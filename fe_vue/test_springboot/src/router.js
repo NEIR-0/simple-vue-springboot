@@ -1,9 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Homepage from './views/Homepage.vue'
-import Dashboard from './views/dashboard/Dashboard.vue'
 import WildCard from './views/WildCard.vue'
 import Wallet from './views/wallet/wallet.vue'
-import MessageComponent from './views/msgTest/MessageComponent.vue'
 import Login from './views/auth/login.vue'
 import Register from './views/auth/Register.vue'
 import About from './views/about/About.vue'
@@ -48,24 +45,6 @@ const routes = [
     path: '/wallet',
     name: 'Wallet',
     component: Wallet
-  },
-  {
-    path: '/testmsg',
-    name: 'testmsg',
-    component: MessageComponent
-  },
-  // dashboard
-  {
-    path: '/dashboard',
-    name: 'dashboardLayout',
-    beforeEnter: auth, 
-    children: [
-      {
-        path: '',
-        name: 'dashboard',
-        component: Dashboard
-      },
-    ]
   },
   // admin
   {
