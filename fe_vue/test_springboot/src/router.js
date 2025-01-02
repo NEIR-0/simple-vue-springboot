@@ -7,15 +7,16 @@ import MessageComponent from './views/msgTest/MessageComponent.vue'
 import Login from './views/auth/login.vue'
 import Register from './views/auth/Register.vue'
 import About from './views/about/About.vue'
-import Etalase from './views/etalase/etalase.vue'
 import CreateProducts from './views/admin/CreateProducts.vue'
 import ListProducts from './views/admin/ListProducts.vue'
 import UpdateProducts from './views/admin/UpdateProducts.vue'
 import CustomerService from './views/admin/CustomerService.vue'
+import Etalase from './views/etalase/Etalase.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
-  if (token) {
+  const role = localStorage.getItem('role');
+  if (token && role) {
     next();
   } else {
     next('/login');

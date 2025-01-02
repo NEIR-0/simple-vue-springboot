@@ -61,7 +61,10 @@ export default {
                 const response = await apiMethods.getData("/users");
                 this.users = response;
             } catch (error) {
-                console.error('Error getting users:', error);
+                console.error('Error send message data:', error);
+                if (error?.message) {
+                this.$router.push('/login')
+                }
             }
         },
 
@@ -81,8 +84,10 @@ export default {
                 this.messages = response;
                 this.currentUserMessages = response;
             } catch (error) {
-                this.messages = [];
-                console.error('Error fetching messages:', error);
+                console.error('Error send message data:', error);
+                if (error?.message) {
+                this.$router.push('/login')
+                }
             }
         },
 
@@ -104,7 +109,10 @@ export default {
                 }
                 this.newMessage = "";
             } catch (error) {
-                console.error('Error sending message:', error);
+                console.error('Error send message data:', error);
+                if (error?.message) {
+                this.$router.push('/login')
+                }
             }
         },
 
