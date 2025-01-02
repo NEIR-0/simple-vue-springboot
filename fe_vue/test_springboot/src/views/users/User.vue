@@ -68,6 +68,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
     prevPage(page) {

@@ -148,6 +148,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
 
@@ -159,12 +165,24 @@ export default {
           status: "success",
         }
         const data = await apiMethods.putData("/transaction/update", body);
+        this.$toast.open({
+          message: "Transaction Success",
+          type: 'success',
+          duration: 3000,
+          position: 'top-right'
+        });
         return data;
       } catch (error) {
         console.error('Error send message data:', error);
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
 
@@ -194,6 +212,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: "Something wrong with your wallet, please try again",
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
 
@@ -230,6 +254,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
 
@@ -270,6 +300,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
 
@@ -290,6 +326,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: "Something wrong with your wallet, please try again",
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
 
@@ -317,6 +359,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
     RealTimeMessager(newMessage) {

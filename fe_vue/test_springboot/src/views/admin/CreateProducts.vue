@@ -64,12 +64,25 @@ export default {
           files: [],
           imageStoreName: "",
         };
+
+        this.$toast.open({
+          message: "Success Created Products",
+          type: 'success',
+          duration: 3000,
+          position: 'top-right'
+        });
         this.$router.push('/admin');
       } catch (error) {
         console.error('Error send message data:', error);
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
 
@@ -82,6 +95,12 @@ export default {
         if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
+        this.$toast.open({
+          message: error?.message,
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
       }
     },
   },

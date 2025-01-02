@@ -23,3 +23,9 @@ input[type=number] {
   background-repeat: no-repeat;
   background-size: cover;
 }
+
+.bgRegister{
+  background-image: url('https://img.freepik.com/free-photo/gradient-technology-background_23-2151895843.jpg?t=st=1735840786~exp=1735844386~hmac=afb1d0379c0c3a854530844d0c58731092d7def82d035fd7326b81daf21e1a82&w=2000');
+  background-repeat: no-repeat;
+  background-size: cover;
+}

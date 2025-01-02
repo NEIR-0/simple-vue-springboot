@@ -104,7 +104,7 @@ const handleError = (error) => {
       localStorage.clear();
       throw new Error(error.response.data);
     }else{
-      throw new Error(error.response.data.message || 'API Error');
+      throw new Error(error?.response?.data?.msg || 'API Error');
     }
   } else if (error.request) {
     console.error('No response received:', error.request);
