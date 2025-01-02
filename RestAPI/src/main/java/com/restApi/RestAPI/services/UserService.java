@@ -8,6 +8,7 @@ import com.restApi.RestAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -26,8 +27,8 @@ public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public List<UserDTO> getAllUsers(int page, int size, String search) {
-        PageRequest pageRequest = PageRequest.of(page, size);
+    public List<UserDTO> getAllUsers(String search, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("email").ascending());
 
         Page<Users> usersPage;
         if (search != null && !search.isEmpty()) {
@@ -42,8 +43,8 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<UserDTO> getAllUsersWithoutAdmin(int page, int size, String search) {
-        PageRequest pageRequest = PageRequest.of(page, size);
+    public List<UserDTO> getAllUsersWithoutAdmin(String search, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("email").ascending());
 
         Page<Users> usersPage;
         if (search != null && !search.isEmpty()) {

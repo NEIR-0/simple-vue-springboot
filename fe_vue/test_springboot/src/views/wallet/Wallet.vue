@@ -67,7 +67,7 @@ export default {
         }
       } catch (error) {
         console.error('Error send message data:', error);
-        if (error?.message) {
+        if (error?.message === "Invalid or expired token") {
           this.$router.push('/login')
         }
       }

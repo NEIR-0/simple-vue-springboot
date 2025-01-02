@@ -1,5 +1,6 @@
 package com.restApi.RestAPI.services;
 
+import com.restApi.RestAPI.dto.ProductsDTO;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.model.product.ImageStore;
 import com.restApi.RestAPI.model.product.Products;
@@ -13,9 +14,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,12 +39,72 @@ public class ProductsService {
     @Autowired
     ImageStoreRepository imageStoreRepository;
 
-    public List<Products> getAllProducts(String search){
+    public ProductsDTO getAllProducts(String search, Integer duration) {
+        List<Products> productList;
+        List<Integer> durations = new ArrayList<>();
+
+        // Tentukan pengurutan berdasarkan 'createdAt'
+        Sort sort = Sort.by("createdAt"); // Gunakan nama kolom yang sesuai
+        sort = sort.descending(); // Tentukan urutan
+
         if (search != null && !search.isEmpty()) {
-            return productsRepository.findByTitleContainingIgnoreCase(search);
+            productList = productsRepository.findByTitleContainingIgnoreCase(search);
         } else {
-            return productsRepository.findAll();
+            productList = productsRepository.findAll(sort);
         }
+
+        // Filter berdasarkan duration jika ada
+        if (duration != null) {
+            productList = productList.stream()
+                    .filter(product -> product.getDuration().equals(duration))
+                    .collect(Collectors.toList());
+        }
+
+        // Mengumpulkan durasi unik
+        productList.forEach(product -> {
+            if (!durations.contains(product.getDuration())) {
+                durations.add(product.getDuration());
+            }
+        });
+
+        return new ProductsDTO(productList, durations, null);
+    }
+
+    public ProductsDTO getAllProductsAdminSite(String search, Integer duration, Integer page, Integer size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<Products> productPage;
+        if (search != null && !search.isEmpty()) {
+            productPage = productsRepository.findByTitleContainingIgnoreCaseAdminSite(search, pageRequest);
+        } else {
+            productPage = productsRepository.findAll(pageRequest);
+        }
+
+        List<Products> productList = productPage.getContent();
+
+        if (duration != null) {
+            productList = productList.stream()
+                    .filter(product -> product.getDuration().equals(duration))
+                    .collect(Collectors.toList());
+        }
+
+        List<Integer> durations = getAllProductDurations();
+        ProductsDTO totalProduct = getAllProducts(search, duration);
+        int totalProductCount = totalProduct.getProduct().size();
+
+        return new ProductsDTO(productList, durations, totalProductCount);
+    }
+
+    private  List<Integer> getAllProductDurations() {
+        List<Products> productList;
+        List<Integer> durations = new ArrayList<>();
+        productList = productsRepository.findAll();
+        for (Products product : productList) {
+            if (!durations.contains(product.getDuration())) {
+                durations.add(product.getDuration());
+            }
+        }
+        return durations;
     }
 
     public Products getProductsById(Long productId) {

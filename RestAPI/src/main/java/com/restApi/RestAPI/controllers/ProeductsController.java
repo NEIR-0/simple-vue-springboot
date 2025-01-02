@@ -1,7 +1,7 @@
 package com.restApi.RestAPI.controllers;
 
+import com.restApi.RestAPI.dto.ProductsDTO;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
-import com.restApi.RestAPI.model.product.ImageStore;
 import com.restApi.RestAPI.model.product.Products;
 import com.restApi.RestAPI.services.ProductsService;
 
@@ -26,10 +26,23 @@ public class ProeductsController {
     ProductsService productsService;
 
     @GetMapping
-    public List<Products> getAllProducts(
-        @RequestParam(value = "search", required = false) String search
+    public ProductsDTO getAllProducts(
+        @RequestParam(value = "search", required = false) String search,
+        @RequestParam(value = "duration", required = false) Integer duration,
+         @RequestParam(value = "page", defaultValue = "0") Integer page,
+        @RequestParam(value = "size", defaultValue = "10") Integer size
     ){
-        return productsService.getAllProducts(search);
+        return productsService.getAllProducts(search, duration);
+    }
+
+    @GetMapping("/admin-site")
+    public ProductsDTO getAllProductsAdminSite(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "duration", required = false) Integer duration,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size
+    ){
+        return productsService.getAllProductsAdminSite(search, duration, page, size);
     }
 
     @GetMapping("/{productId}")
@@ -130,7 +143,7 @@ public class ProeductsController {
 
     @MessageMapping("/updateDataRealTime")
     @SendTo("/topic/updateDataRealTime")
-    public List<Products> updateDataRealTime(){
-        return productsService.getAllProducts("");
+    public ProductsDTO updateDataRealTime(){
+        return productsService.getAllProducts("", null);
     }
 }
