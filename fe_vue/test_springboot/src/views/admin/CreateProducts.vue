@@ -66,7 +66,10 @@ export default {
         };
         this.$router.push('/admin');
       } catch (error) {
-        console.error('Error submitting data:', error);
+        console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
 
@@ -75,7 +78,10 @@ export default {
         const response = await apiMethods.getData("/image-store");
         this.imagesList = response
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
   },

@@ -19,7 +19,7 @@
             <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="Search..." name="search" id="search">
           </div>
         </div>
-        <div class="w-full flex justify-end">
+        <div v-if="token && role == 'user'" class="w-full flex justify-end">
           <button @click="showChatUser" class="h-10 p-5 flex items-center justify-center rounded-md font-semibold text-slate-800 bg-[#ffde09] hover:bg-[#ffe74e] duration-300 ease-in-out">Chat customer service</button>
         </div>
       </div>
@@ -58,6 +58,8 @@ export default {
   },
   data() {
     return {
+      token: localStorage.getItem('token'),
+      role: localStorage.getItem('role'),
       transactions: [],
       products: [],
       currentPage: 0,
@@ -95,6 +97,9 @@ export default {
         return data;
       } catch (error) {
         console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
     
@@ -111,6 +116,9 @@ export default {
         this.totalPages = Math.ceil(data.length / this.pageSize);
       } catch (error) {
         console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
 
@@ -125,6 +133,9 @@ export default {
         return data;
       } catch (error) {
         console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
 
@@ -150,7 +161,10 @@ export default {
           console.log("Ethereum wallet is not connected. !!!!!");
         }
       } catch (error) {
-        console.error('Error send message data:', error);   
+        console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
 
@@ -184,6 +198,9 @@ export default {
         }
       } catch (error) {
         console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
 
@@ -221,6 +238,9 @@ export default {
         }
       } catch (error) {
         console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
 
@@ -238,6 +258,9 @@ export default {
         }
       } catch (error) {
         console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
 
@@ -261,7 +284,10 @@ export default {
         this.newMessage = "";
               
       } catch (error) {
-          console.error('Error send message data:', error);
+        console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
     RealTimeMessager(newMessage) {

@@ -43,6 +43,9 @@ export default {
         this.totalPages = Math.ceil(response.length / this.pageSize);
       } catch (error) {
         console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
 
@@ -53,6 +56,9 @@ export default {
         this.updateDataDeleteProducts();
       } catch (error) {
         console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
 

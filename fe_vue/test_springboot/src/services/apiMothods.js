@@ -1,12 +1,9 @@
 import axios from 'axios';
 
-const baseUrl = import.meta.env.VITE_BASE_API_URL; // Base URL dari environment variable
-const BearerToken = localStorage.getItem('token'); // Token dari localStorage
-
+const baseUrl = import.meta.env.VITE_BASE_API_URL; 
 const axiosInstanceBasic = axios.create({
   baseURL: baseUrl,
   headers: {
-    Authorization: `${BearerToken}`,
     'Content-Type': 'application/json',
   },
 });
@@ -14,10 +11,28 @@ const axiosInstanceBasic = axios.create({
 const axiosInstanceFormData = axios.create({
   baseURL: baseUrl,
   headers: {
-    Authorization: `${BearerToken}`,
     'Content-Type': 'multipart/form-data', 
   },
 });
+
+const addAuthorizationHeader = (instance) => {
+  instance.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token'); 
+      if (token) {
+        config.headers.Authorization = `${token}`;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+};
+
+// Tambahkan interceptor ke instance
+addAuthorizationHeader(axiosInstanceBasic);
+addAuthorizationHeader(axiosInstanceFormData);
 
 const getData = async (endpoint, params) => {
   try {
@@ -86,6 +101,7 @@ const handleError = (error) => {
   if (error.response) {
     console.error('API Error:', error.response.status, error.response.data);
     if(error.response.data === "Invalid or expired token"){
+      localStorage.clear();
       throw new Error(error.response.data);
     }else{
       throw new Error(error.response.data.message || 'API Error');

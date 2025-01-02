@@ -66,7 +66,10 @@ export default {
           console.log("Ethereum wallet is not connected. !!!!!");
         }
       } catch (error) {
-        console.log(error, "!!!!!!!!!!!!!!!!!");        
+        console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
   },

@@ -64,7 +64,10 @@ export default {
         this.users = data;
         this.totalPages = Math.ceil(data.length / this.pageSize);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error send message data:', error);
+        if (error?.message) {
+          this.$router.push('/login')
+        }
       }
     },
     prevPage(page) {
