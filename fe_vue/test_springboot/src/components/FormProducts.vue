@@ -122,7 +122,7 @@
 
     <div v-if="isUpdate" class="w-full space-y-2">
       <div v-if="!showChangeImageInput" class="w-full h-[300px]">
-        <img class="w-full h-full" :src="`http://localhost:8081${localForm.image}`" alt="tempFiles" />
+        <img class="w-full h-full" :src="`${baseUrl}${localForm.image}`" alt="tempFiles" />
       </div>
       <div
         @click="showChangeImages"
@@ -227,6 +227,7 @@ export default {
   },
   data() {
     return {
+      baseUrl: import.meta.env.VITE_BASE_API_URL,
       localForm: { ...this.formData },
       tempFiles: [],
       selectedImage: "Choose an Image Template",

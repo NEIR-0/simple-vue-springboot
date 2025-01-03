@@ -1,13 +1,12 @@
 package com.restApi.RestAPI.config;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,7 +14,8 @@ import java.io.IOException;
 // jangan pakai @Configuration pakai @Component, some how lebih aman
 @Component
 public class JwtFilter implements Filter {
-    private final String secretKey = "{jwt.secret}";
+    @Value("${base.url.fe}")
+    private String baseUrl;
 
     @Autowired
     JwtUtil jwtUtil;
@@ -27,7 +27,7 @@ public class JwtFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         // wajib buat cors
-        httpResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+        httpResponse.setHeader("Access-Control-Allow-Origin", baseUrl);
         httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         httpResponse.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept");
         httpResponse.setHeader("Access-Control-Expose-Headers", "Authorization");
