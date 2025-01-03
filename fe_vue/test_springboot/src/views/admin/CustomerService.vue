@@ -1,23 +1,24 @@
 <template>
     <div class="h-screen w-full flex flex-col items-center justify-center py-14 px-5 relative">
-        <div class="w-1/2 h-screen space-y-4">
-            <h1 class="text-3xl font-semibold text-center">Customer Services</h1>
-            <div class="w-full flex items-center justify-center">
-                <div class="h-fit w-1/2 bg-[#EAE3D8] flex items-center justify-center p-5 rounded-md">
-                    <div class="w-full">
-                        <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="Search by email....." name="search" id="search">
-                    </div>
+        <h1 class="text-3xl font-semibold text-center">Customer Services</h1>
+        <div class="w-1/2 flex items-center justify-center mt-5 mb-10">
+            <div class="h-fit w-1/2 bg-[#3D3D3D] flex items-center justify-center p-5 rounded-md">
+                <div class="w-full">
+                    <input v-model="searchQuery" @input="onSearch" class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text" placeholder="Search by email....." name="search" id="search">
                 </div>
             </div>
-            <div class="w-full h-fit flex flex-col items-center justify-center mt-10 space-y-2">
-                <div v-for="user in sortedUsers" :key="user.id" class="w-full h-fit flex items-center justify-center flex-col space-y-4">
-                    <button 
-                        @click="changeUser(user)" 
-                        class=""
-                        :class="`${userNewMessages.includes(user.id) ? 'bg-red-300' : 'bg-white'} w-1/4 h-10 shadow-lg rounded-md flex items-center justify-center border-2 border-slate-200`"
-                    >
-                        {{user?.email}}
-                    </button>
+        </div>
+        <div class="w-full h-screen overflow-hidden overflow-y-scroll ms-6">
+            <div class="w-1/2 h-full space-y-4 relative">
+                <div class="w-full h-fit grid grid-cols-3 gap-4 bg-[#578E7E] p-5 rounded-md">
+                    <div v-for="user in sortedUsers" :key="user.id" class="w-full h-fit flex items-center justify-center flex-col space-y-4">
+                        <button 
+                            @click="changeUser(user)" 
+                            :class="`${userNewMessages.includes(user.id) ? 'bg-red-300' : 'bg-white'} w-full h-10 shadow-lg rounded-md flex items-center justify-center border-2 border-slate-200`"
+                        >
+                            {{user?.email}}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

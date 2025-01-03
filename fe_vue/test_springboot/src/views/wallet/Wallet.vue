@@ -1,21 +1,21 @@
 <template>
-    <div class="h-screen flex flex-col items-center justify-center bg-red-300">
-      <h1>Wallet</h1>
-
-      <input
-        type="number"
-        v-model="nominal"
-        placeholder="nominal..."
-        class="mb-4 px-4 py-2 border rounded"
-      />
-      <input
-        type="text"
-        v-model="address"
-        placeholder="address..."
-        class="mb-4 px-4 py-2 border rounded"
-      />
-
-      <button @click="signTransaction">sign</button>
+    <div class="h-screen flex flex-col items-center justify-center bg-[#3D3D3D]">
+      <div class="px-20 py-10 w-[500px] rounded-lg shadow-xl flex flex-col justify-center items-center border-2 bg-white">
+        <h1 class="w-full text-center text-2xl font-medium mb-5">Transfer Ether</h1>
+        <div class="w-full space-y-4 flex items-center justify-center flex-col">
+          <input
+            class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text"
+            v-model="nominal"
+            placeholder="nominal..."
+          />
+          <input
+            class="h-10 w-full font-semibold text-slate-500 border-2 border-slate-300 px-3 rounded-md focus:ring-0 outline-none" type="text"
+            v-model="address"
+            placeholder="address..."
+          />
+        </div>
+        <button @click="signTransaction" class="w-1/2 h-10 p-5 mt-5 flex items-center justify-center rounded-md font-semibold text-slate-800 bg-[#ffde09] hover:bg-[#ffe74e] duration-300 ease-in-out">sign</button>
+      </div>
     </div>
 </template>
 
