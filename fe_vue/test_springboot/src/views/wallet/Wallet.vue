@@ -62,6 +62,9 @@ export default {
           console.log("Tx: ", tx, "????");
           console.log("Transaction Hash: ", tx.hash);
           await tx.wait();
+
+          this.nominal = ""
+          this.address = ""
           this.$toast.open({
             message: "Transaction Success",
             type: 'success',

@@ -1,5 +1,14 @@
 <template>
-    <div class="h-screen flex justify-between">
+    <div class="h-screen flex justify-between relative">
+      <div class="absolute top-10 right-10 space-y-2">
+        <button @click="this.$router.push('/')" class="px-10 py-3 flex items-center justify-center rounded-md font-bold text-slate-800 bg-[#EAE3D8] hover:bg-[#e2d7c5] duration-300 ease-in-out">
+          GO TO SHOP <i class="ri-arrow-right-line text-xl ms-2"></i>
+        </button>
+        <div class="w-full h-0.5 flex items-center justify-end">
+          <div class="w-1/2 h-full bg-black"></div>
+        </div>
+      </div>
+
       <div class="w-[60%] h-full flex flex-col justify-center items-center p-5 relative bgLogin">
         <div class="w-[50%] h-fit absolute top-10 -right-0 bg-white pe-10 py-3 rounded-s-lg border-y-2 border-s-2 border-[#e1d4be]">
           <h1 class="font-bold text-xl w-full text-right">Decentralized Subscription Marketplace</h1>

@@ -35,7 +35,7 @@
           </select>
           <h1 class="text-white font-medium text-lg">/ days</h1>
         </div>
-        <div v-if="token && role == 'user' && !showChatBox" class="w-full flex justify-end">
+        <div v-if="!showChatBox" class="w-full flex justify-end">
           <button @click="showChatUser" class="h-10 p-5 flex items-center justify-center rounded-md font-semibold text-slate-800 bg-[#ffde09] hover:bg-[#ffe74e] duration-300 ease-in-out">Chat customer service</button>
         </div>
       </div>
@@ -58,6 +58,7 @@
 
 <script>
 import abi from "../../../abi/TransactionStorage.js";
+import abiDeploy from "../../../abi/TransactionStorageTestSepolia";
 import { ethers } from "ethers";
 import WebSocketService from '../../services/WebSocketService';
 import CardProducts from '../../components/CardProducts.vue'
@@ -115,6 +116,21 @@ export default {
     },
 
     async showChatUser() {
+      if(!this.token && !this.role) {
+        this.$router.push('/login')
+        return
+      }
+
+      if(this.role != "user") {
+        this.$toast.open({
+          message: "You are not a user",
+          type: 'warning',
+          duration: 3000,
+          position: 'top-right'
+        });
+        return
+      }
+
       this.showChatBox = !this.showChatBox
       try {
         const data = await apiMethods.getData("/message");
@@ -194,10 +210,13 @@ export default {
           const sig = await prov.getSigner();
 
           const contractAddress = import.meta.env
-            .VITE_ADDRESS_CONTACT_SIMPLESENDERETHER;
+            .VITE_ADDRESS_CONTACT_TRANSACTIONSTORAGE;
 
           // local
-          const smartContract = new ethers.Contract(contractAddress, abi, sig); 
+          const smartContract = new ethers.Contract(contractAddress, abi, sig);
+
+          // developer
+          // const smartContract = new ethers.Contract(contractAddress, abiDeploy, sig); 
 
           const tx = await smartContract.storeStringWithPayment(stringData, {
             value: ethers.utils.parseEther(String(price)),
@@ -279,7 +298,7 @@ export default {
 
           // Format: "DD/MM/YYYY HH:MM:SS"
           const formattedDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-          const storeData = `${data.description}, Date: ${formattedDate}`;
+          const storeData = `${data.title}, Date: ${formattedDate}`;
           const blockchain = await this.createBlockchain(storeData, data.price);
           console.log("blockchain: ", blockchain);
   

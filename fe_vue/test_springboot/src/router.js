@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import WildCard from './views/WildCard.vue'
 import Wallet from './views/wallet/wallet.vue'
-import Login from './views/auth/login.vue'
 import Register from './views/auth/Register.vue'
 import About from './views/about/About.vue'
 import CreateProducts from './views/admin/CreateProducts.vue'
@@ -9,6 +8,7 @@ import ListProducts from './views/admin/ListProducts.vue'
 import UpdateProducts from './views/admin/UpdateProducts.vue'
 import CustomerService from './views/admin/CustomerService.vue'
 import Etalase from './views/etalase/Etalase.vue'
+import Login from './views/auth/Login.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
