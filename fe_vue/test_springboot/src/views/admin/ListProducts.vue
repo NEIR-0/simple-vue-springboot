@@ -1,5 +1,5 @@
 <template>
-  <div class="h-fit w-full flex flex-col items-center justify-center py-20 px-5 relative">
+  <div class="h-fit w-full flex flex-col items-center justify-center py-20 px-5 relative bg-[#FFFAEC]">
     <div class="absolute top-20 right-20">
       <router-link class="bg-red-200 rounded-md py-2 px-10 items-center justify-center" to="/admin/create-product">+ create product</router-link>
     </div>

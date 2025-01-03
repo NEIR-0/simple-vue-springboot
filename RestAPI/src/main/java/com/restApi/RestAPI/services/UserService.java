@@ -43,18 +43,15 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<UserDTO> getAllUsersWithoutAdmin(String search, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("email").ascending());
-
-        Page<Users> usersPage;
+    public List<UserDTO> getAllUsersWithoutAdmin(String search) {
+        List<Users> users;
         if (search != null && !search.isEmpty()) {
-            usersPage = userRepository.findByEmailContainingIgnoreCase(search, pageRequest);
+            users = userRepository.findByEmailWithoutAdminContainingIgnoreCase(search);
         } else {
-            usersPage = userRepository.findAll(pageRequest);
+            users = userRepository.findAll();
         }
 
-        return usersPage.getContent()
-                .stream()
+        return users.stream()
                 .filter(user -> !"admin".equalsIgnoreCase(user.getRole())) // Filter out admin
                 .map(user -> new UserDTO(user.getId(), user.getEmail(), user.getRole()))
                 .collect(Collectors.toList());

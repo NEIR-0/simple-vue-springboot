@@ -1,5 +1,5 @@
 <template>
-    <div :class="`${isAdmin ? 'w-[300px] bg-orange-100' : 'w-full bg-white'} h-fit p-5 rounded-lg`">
+    <div :class="`${isAdmin ? 'w-[300px] bg-[#F5ECD5]' : 'w-full bg-white'} h-fit p-5 rounded-lg`">
         <img :src="`http://localhost:8081${products?.image}`" :alt="products?.title" class="w-full h-[150px]">
         <div class="w-full mt-2 flex flex-col space-y-5 rounded-lg">
             <div class="w-full space-y-1 text-black">
@@ -19,8 +19,8 @@
                 </div>
             </div>
             <div v-if="isAdmin" class="w-full h-fit flex justify-between">
-              <button @click="navigateToUpdate(products.id)" class="w-[48%] h-10 flex items-center justify-center bg-yellow-300">edit</button>
-              <button @click="deleteProduct(products.id)" class="w-[48%] h-10 flex items-center justify-center bg-red-300">delete</button>
+              <button @click="navigateToUpdate(products.id)" class="w-[48%] h-10 flex items-center justify-center bg-yellow-300 capitalize text-lg font-medium">edit</button>
+              <button @click="deleteProduct(products.id)" class="w-[48%] h-10 flex items-center justify-center bg-red-300 capitalize text-lg font-medium">delete</button>
             </div>
             <div v-if="!isAdmin" class="w-full h-fit flex justify-between">
               <button v-if="isWalletConnected" @click="onBuy(products)" class="w-full h-10 rounded-md bg-green-300 text-white font-bold duration-300 ease-in-out hover:bg-green-500">BUY, {{ products?.price }} ETH</button>

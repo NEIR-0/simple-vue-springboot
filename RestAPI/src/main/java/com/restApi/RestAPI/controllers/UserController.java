@@ -40,11 +40,9 @@ public class UserController {
 
     @GetMapping("/without-admin")
     public List<UserDTO> getAllUsersWithoutAdmin(
-            @RequestParam(value = "page", defaultValue = "0") Integer page,
-            @RequestParam(value = "size", defaultValue = "10") Integer size,
             @RequestParam(value = "search", required = false) String search,
             HttpServletRequest request
     ) {
-        return userService.getAllUsersWithoutAdmin(search, page, size);
+        return userService.getAllUsersWithoutAdmin(search);
     }
 }
