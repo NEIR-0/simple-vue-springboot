@@ -1,6 +1,6 @@
 <template>
     <div :class="`${isAdmin ? 'w-[300px] bg-[#F5ECD5]' : 'w-full bg-white'} h-fit p-5 rounded-lg`">
-        <img :src="`http://localhost:8081${products?.image}`" :alt="products?.title" class="w-full h-[150px]">
+        <img :src="`${baseUrl}${products?.image}`" :alt="products?.title" class="w-full h-[150px]">
         <div class="w-full mt-2 flex flex-col space-y-5 rounded-lg">
             <div class="w-full space-y-1 text-black">
                 <h1 class="capitalize h-[30px] flex items-center overflow-y-scroll text-lg font-bold break-words">{{ products?.title }}</h1>
@@ -55,6 +55,11 @@ export default {
     deleteProduct: {
       type: Function,
     },
+  },
+  data() {
+    return {
+      baseUrl: import.meta.env.VITE_BASE_API_URL
+    };
   },
 };
 </script>

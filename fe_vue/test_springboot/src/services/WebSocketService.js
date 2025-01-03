@@ -1,5 +1,6 @@
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
+const baseUrl = import.meta.env.VITE_BASE_API_URL; 
 
 class WebSocketService {
   constructor() {
@@ -8,7 +9,7 @@ class WebSocketService {
 
   // Method untuk menghubungkan ke server WebSocket
   connect(callback) {
-    const socket = new SockJS('http://localhost:8081/ws'); // Sesuaikan dengan endpoint WebSocket yang kamu konfigurasi di Spring Boot
+    const socket = new SockJS(baseUrl + '/ws'); // Sesuaikan dengan endpoint WebSocket yang kamu konfigurasi di Spring Boot
     this.stompClient = Stomp.over(socket);
 
     this.stompClient.connect({}, (frame) => {
@@ -17,7 +18,7 @@ class WebSocketService {
   }
 
   responseSendMessageRealTime(callback) {
-    const socket = new SockJS('http://localhost:8081/ws');
+    const socket = new SockJS(baseUrl + '/ws');
     this.stompClient = Stomp.over(socket);
     this.stompClient.debug = null // disable log
 
@@ -43,7 +44,7 @@ class WebSocketService {
   }
 
   responseUpdateTransactionsRealTime(callback) {
-    const socket = new SockJS('http://localhost:8081/ws');
+    const socket = new SockJS(baseUrl + '/ws');
     this.stompClient = Stomp.over(socket);
     this.stompClient.debug = null // disable log
 
@@ -66,7 +67,7 @@ class WebSocketService {
   }
 
   responseUpdateDataDeleteProductsRealTime(callback) {
-    const socket = new SockJS('http://localhost:8081/ws');
+    const socket = new SockJS(baseUrl + '/ws');
     this.stompClient = Stomp.over(socket);
     this.stompClient.debug = null // disable log
 

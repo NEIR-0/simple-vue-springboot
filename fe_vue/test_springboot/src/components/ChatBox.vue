@@ -20,7 +20,9 @@
             class="max-w-[70%] px-4 py-2 rounded-lg text-white font-semibold"
             :class="message?.sender === 'user' ? 'bg-green-500' : 'bg-red-500'"
           >
-            {{ message.content }}
+            <p class="w-full break-words text-base">
+              {{ message.content }}
+            </p>
             <span class="block text-xs text-gray-300 mt-1">
               {{ formatTime(message.createdAt) }}
             </span>
