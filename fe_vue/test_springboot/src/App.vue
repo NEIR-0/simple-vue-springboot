@@ -6,7 +6,7 @@ const route = useRoute()
 
 <template>
   <Navbar 
-    v-if="!['/login', '/register', '/admin/create-product'].includes(route?.path) && !route?.path.startsWith('/admin/update-product/')" 
+    v-if="!['/login', '/register', '/admin/create-product'].includes(route?.path) && !route?.path.startsWith('/admin/update-product/')"  
   />
   <router-view></router-view>
 </template>
