@@ -26,63 +26,78 @@
     </button>
     
     <!-- Status -->
-    <p v-if="status" class="mt-4">{{ status }}</p>
+    <p v-if="responseError" class="mt-4">{{ responseError }}</p>
   </div>
 </template>
 
 <script>
-  import { ethers } from "ethers";
-  import abi from "../../../abi/tokenize/SimpleToken.js"; // ABI dari kontrak
-  import bytecode from "../../../abi/tokenize/byteCodeSimpleToken.js"; // Bytecode kontrak
+import { ethers } from "ethers";
+import abi from "../../../abi/tokenize/SimpleToken.js";
+import bytecode from "../../../abi/tokenize/byteCodeSimpleToken.js";
+import apiMethods from '../../services/apiMothods';
   
-  export default {
-      data() {
+export default {
+    data() {
       return {
           tokenName: "",
           tokenSymbol: "",
           tokenPrice: "",
-          status: ""
+          responseError: ""
       };
-      },
-      methods: {
+    },
+    methods: {
       async deployToken() {
           if (!window.ethereum) {
-              this.status = "Please install MetaMask!";
+              this.responseError = "Please install MetaMask!";
               return;
           }
   
           try {
               if (!this.tokenName || !this.tokenSymbol || !this.tokenPrice) {
-                  this.status = "All inputs are required!";
+                  this.responseError = "All inputs are required!";
                   return;
               }
   
-              // Provider dan signer untuk berinteraksi dengan Ethereum
               const provider = new ethers.providers.Web3Provider(window.ethereum);
               const signer = provider.getSigner();
-  
-              // Membuat ContractFactory untuk mendeply kontrak baru
+              const addressCreator = await signer.getAddress();
               const factory = new ethers.ContractFactory(abi, bytecode, signer);
-              
-              // Token price dalam Ether dikonversi ke Wei
               const tokenPriceInEther = ethers.utils.parseEther(String(this.tokenPrice));
-  
-              // Men-deploy kontrak dengan input dari pengguna
               const contract = await factory.deploy(this.tokenName, this.tokenSymbol, tokenPriceInEther);
-  
-              // Menunggu transaksi untuk dikonfirmasi
-              const receipt = await contract.deployTransaction.wait();
-              console.log("receipt: ", receipt);
-              
-              // Mendapatkan alamat kontrak dari receipt
               const deployedContractAddress = contract.address;
-  
-              this.status = `Token deployed! Contract Address: ${deployedContractAddress}, Transaction Hash: ${contract.deployTransaction.hash}`;
+
+              if(deployedContractAddress){
+                const body = {
+                  symbol: this.tokenSymbol,
+                  name: this.tokenName,
+                  tokenPrice: this.tokenPrice,
+                  hash: contract.deployTransaction.hash,
+                  addressCreator: addressCreator,
+                  totalSupply: 0,
+                  totalBurn: 0,
+                  alreadyBurn: 0,
+                  isApprove: true,
+                  status: "deployed",
+                  profitPersen: 0,
+                  addressToken: deployedContractAddress,
+                };
+
+                this.createTokenDb(body);
+              }
           } catch (error) {
               console.error(error);
-              this.status = "Error deploying token!";
+              this.responseError = "Error deploying token!";
           }
       },
-      },
-  };
+      async createTokenDb(body){
+        try {
+          const response = await apiMethods.postData("/token/create", body);
+          console.log(response, ">>>>>>");
+          this.$router.push('/token')
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    },
+};
 </script>

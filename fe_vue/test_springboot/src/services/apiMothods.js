@@ -98,6 +98,7 @@ const deleteData = async (endpoint) => {
 };
 
 const handleError = (error) => {
+  console.log(error, ">>>>>>>>>!!!!");  
   if (error.response) {
     console.error('API Error:', error.response.status, error.response.data);
     if(error.response.data === "Invalid or expired token"){
