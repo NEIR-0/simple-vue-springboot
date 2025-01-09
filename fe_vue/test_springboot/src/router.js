@@ -9,6 +9,8 @@ import UpdateProducts from './views/admin/UpdateProducts.vue'
 import CustomerService from './views/admin/CustomerService.vue'
 import Etalase from './views/etalase/Etalase.vue'
 import Login from './views/auth/Login.vue'
+import Tokenisasi from './views/tokenisasi/tokenisasi.vue'
+import ListToken from './views/tokenisasi/ListToken.vue'
 
 const auth = (to, from, next) => {
   const token = localStorage.getItem('token');
@@ -45,6 +47,23 @@ const routes = [
     path: '/wallet',
     name: 'Wallet',
     component: Wallet
+  },
+  {
+    path: '/token',
+    name: 'token',
+    beforeEnter: auth, 
+    children: [
+      {
+        path: '',
+        name: 'list-token',
+        component: ListToken
+      },
+      {
+        path: 'create',
+        name: 'create-token',
+        component: Tokenisasi
+      },
+    ]
   },
   // admin
   {

@@ -27,5 +27,5 @@ pakai vscode
 ## COMMAND
 - npx hardhat compile
 - npx hardhat node
-- npx hardhat ignition deploy ./ignition/modules/SimpleSendEther.js --network localhost && npx hardhat ignition deploy ./ignition/modules/TransactionStorage.js --network localhost (chain cuz local) 
+- npx hardhat ignition deploy ./ignition/modules/SimpleSendEther.js --network localhost && npx hardhat ignition deploy ./ignition/modules/TransactionStorage.js --network localhost && npx hardhat ignition deploy ./ignition/modules/SimpleToken.js --network localhost (chain cuz local) 
 - npx hardhat ignition deploy ./ignition/modules/TransactionStorageTestSepolia.js --network sepolia (example)
