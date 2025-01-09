@@ -3,8 +3,10 @@ package com.restApi.RestAPI.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.model.message.Messages;
+import com.restApi.RestAPI.model.token.Tokens;
 import com.restApi.RestAPI.model.transaction.Transactions;
 import com.restApi.RestAPI.repository.MessagesRepository;
+import com.restApi.RestAPI.repository.TokensRepository;
 import com.restApi.RestAPI.repository.TransactionsRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class RabbitMQReceiverService {
 
     @Autowired
     MessagesRepository messagesRepository;
+
+    @Autowired
+    TokensRepository tokensRepository;
 
     @RabbitListener(queues = "transactionQueue")
     public String receiveTransaction(String transactionJson) {
@@ -76,5 +81,21 @@ public class RabbitMQReceiverService {
     }
     private void processMessageCreate(Messages inputUser) {
         messagesRepository.save(inputUser);
+    }
+
+
+    @RabbitListener(queues = "tokenQueue")
+    public void receiveTokenCreate(String registerUserJson) {
+        try {
+            // Konversi JSON ke objek Transactions
+            Tokens tokenCreate = objectMapper.readValue(registerUserJson, Tokens.class);
+            System.out.println("Processing create Message user in the background: " + tokenCreate);
+            processTokenCreate(tokenCreate);
+        } catch (Exception e) {
+            System.out.println("Error processing register user: " + e.getMessage());
+        }
+    }
+    private void processTokenCreate(Tokens inputUser) {
+        tokensRepository.save(inputUser);
     }
 }

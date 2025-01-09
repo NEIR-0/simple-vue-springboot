@@ -17,7 +17,7 @@ const handleLogout = async () => {
         <router-link class="h-full px-5 capitalize flex items-center justify-center duration-300 ease-in-out text-white hover:bg-stone-50 hover:text-slate-800" to="/about">About</router-link>
         <router-link class="h-full px-5 capitalize flex items-center justify-center duration-300 ease-in-out text-white hover:bg-stone-50 hover:text-slate-800" to="/wallet">Wallet</router-link>
         <router-link v-if="!token" class="h-full px-5 capitalize flex items-center justify-center duration-300 ease-in-out text-white hover:bg-stone-50 hover:text-slate-800" to="/login">Login</router-link>
-        <router-link v-if="token" class="h-full px-5 capitalize flex items-center justify-center duration-300 ease-in-out text-white hover:bg-stone-50 hover:text-slate-800" to="/token">Token</router-link>
+        <router-link v-if="token && role === 'admin'" class="h-full px-5 capitalize flex items-center justify-center duration-300 ease-in-out text-white hover:bg-stone-50 hover:text-slate-800" to="/token">Token</router-link>
         <router-link v-if="token && role === 'admin'" class="h-full px-5 capitalize flex items-center justify-center duration-300 ease-in-out text-white hover:bg-stone-50 hover:text-slate-800" to="/admin">admin</router-link>
         <router-link v-if="token && role === 'admin'" class="h-full px-5 capitalize flex items-center justify-center duration-300 ease-in-out text-white hover:bg-stone-50 hover:text-slate-800" to="/admin/customer">customer</router-link>
         <button v-if="token" @click="handleLogout" class="h-full px-5 capitalize flex items-center justify-center duration-300 ease-in-out text-white hover:bg-stone-50 hover:text-slate-800">logout</button>

@@ -47,11 +47,10 @@ contract SimpleToken {
     // Fungsi untuk burn token
     function burn(uint256 amount) public {
         uint256 amountInWei = amount * (10 ** decimals);
-        require(balanceOf[msg.sender] >= amountInWei, "Insufficient balance to burn");
+        require(totalSupply >= amountInWei, "Insufficient balance to burn");
 
         uint256 oldTotalSupply = totalSupply;
         totalSupply -= amountInWei;
-        balanceOf[msg.sender] -= amountInWei;
 
         // Redistribute balances to reflect reduced total supply
         for (uint256 i = 0; i < holders.length; i++) {
@@ -60,10 +59,6 @@ contract SimpleToken {
                 balanceOf[account] = (balanceOf[account] * totalSupply) / oldTotalSupply;
             }
         }
-
-        // Compensate user based on burned tokens
-        uint256 burnCompensation = (amountInWei * tokenPrice) / (10 ** decimals);
-        payable(msg.sender).transfer(burnCompensation);
 
         emit Burn(msg.sender, amountInWei);
         emit Transfer(msg.sender, address(0), amountInWei);
@@ -76,14 +71,12 @@ contract SimpleToken {
         uint256 cost = amountToBuyInWei * tokenPrice / (10 ** decimals); // Cost in wei
         require(msg.value >= cost, "Insufficient ETH sent");
 
-        require(totalSupply >= amountToBuyInWei, "Not enough tokens available");
-
         if (balanceOf[msg.sender] == 0) {
             holders.push(msg.sender);
         }
 
         balanceOf[msg.sender] += amountToBuyInWei;
-        totalSupply -= amountToBuyInWei;
+        balanceOf[owner] -= amountToBuyInWei;
 
         // Refund excess ETH sent (if any)
         if (msg.value > cost) {

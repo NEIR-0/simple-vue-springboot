@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.model.message.Messages;
+import com.restApi.RestAPI.model.token.Tokens;
 import com.restApi.RestAPI.model.transaction.Transactions;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +43,11 @@ public class RabbitMQSenderService {
         System.out.println("CreateMessage message sent to RabbitMQ: " + inputUser);
         String createMessageJson = objectMapper.writeValueAsString(inputUser);
         return (String) amqpTemplate.convertSendAndReceive("myExchange", "message.routing.key", createMessageJson);
+    }
+
+    public void sendMessageForTokens(Tokens inputUser) throws JsonProcessingException {
+        System.out.println("CreateToken message sent to RabbitMQ: " + inputUser);
+        String createMessageJson = objectMapper.writeValueAsString(inputUser);
+        amqpTemplate.convertSendAndReceive("myExchange", "token.routing.key", createMessageJson);
     }
 }
