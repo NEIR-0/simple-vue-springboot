@@ -1,4 +1,4 @@
-package com.restApi.RestAPI.dto;
+package com.restApi.RestAPI.dto.tokenDTO;
 
 public class TokenDTO {
     private String name;
@@ -6,18 +6,24 @@ public class TokenDTO {
     private String symbol;
     private int profitPersen;
     private String status;
-    private int totalSupply;
+    private double totalSupply;
     private String addressToken;
+    private Long id;
+    private int totalBurn;
+    private int alreadyBurn;
 
     // Constructor
-    public TokenDTO(String name, int tokenPrice, String symbol, int profitPersen, String status, int totalSupply, String addressToken) {
+    public TokenDTO(Long id, String name, int tokenPrice, String symbol, int profitPersen, String status, double totalSupply, String addressToken, int totalBurn, int alreadyBurn) {
+        this.id = id;
         this.name = name;
         this.tokenPrice = tokenPrice;
+        this.totalBurn = totalBurn;
         this.symbol = symbol;
         this.profitPersen = profitPersen;
         this.status = status;
         this.totalSupply = totalSupply;
         this.addressToken = addressToken;
+        this.alreadyBurn = alreadyBurn;
     }
 
     // Getters and Setters
@@ -45,6 +51,15 @@ public class TokenDTO {
         this.tokenPrice = tokenPrice;
     }
 
+    public int getTotalBurn() {
+        return totalBurn;
+    }
+
+    public void setTotalBurn(int totalBurn) {
+        this.totalBurn = totalBurn;
+    }
+
+
     public String getSymbol() {
         return symbol;
     }
@@ -61,6 +76,14 @@ public class TokenDTO {
         this.profitPersen = profitPersen;
     }
 
+    public int getAlreadyBurn() {
+        return alreadyBurn;
+    }
+
+    public void setAlreadyBurn(int alreadyBurn) {
+        this.alreadyBurn = alreadyBurn;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -69,11 +92,17 @@ public class TokenDTO {
         this.status = status;
     }
 
-    public int getTotalSupply() {
+    public double getTotalSupply() {
         return totalSupply;
     }
 
-    public void setTotalSupply(int totalSupply) {
+    public void setTotalSupply(double totalSupply) {
         this.totalSupply = totalSupply;
+    }
+
+    public long getId() { return id; }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

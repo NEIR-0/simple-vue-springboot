@@ -2,11 +2,11 @@
     <div class="w-full h-fit flex items-center justify-center flex-col pt-20">
         <!-- Tombol Connect MetaMask -->
         <div>
-            <button @click="connectMetaMask" class="bg-blue-500 text-white p-2 rounded mb-4">Connect MetaMask</button>
+            <button v-if="!isWalletConnected" @click="connectWallets" class="bg-blue-500 text-white p-2 rounded mb-4">Connect MetaMask</button>
         </div>
 
         <!-- Info token dan tombol lainnya jika MetaMask terhubung -->
-        <div v-if="isConnected">
+        <div v-if="isWalletConnected">
             <h1 class="text-2xl font-semibold mb-4">Token Information</h1>
 
             <!-- Tabel untuk menampilkan data token -->
@@ -49,7 +49,7 @@
                 </tbody>
             </table>
 
-            <div v-if="token && role === 'admin'">
+            <div v-if="token && role === 'admin' && tempAddress === owner">
                 <div class="mt-4 flex items-center justify-center space-x-4">
                     <div v-if="!isBurning" class="flex items-center justify-center space-x-4">
                         <div class="mb-2">
@@ -60,23 +60,33 @@
                             <label for="persentaseProfit" class="block text-lg">Persentase Profit:</label>
                             <input v-model="persentaseProfit" type="number" class="p-2 border rounded" placeholder="Enter amount to mint" />
                         </div>
+                        <div class="mb-2">
+                            <label for="total_burn" class="block text-lg">Total Burn:</label>
+                            <input v-model="total_burn" type="number" class="p-2 border rounded" placeholder="Enter amount to mint" />
+                        </div>
                     </div>
     
                     <div class="flex items-center justify-center space-x-4">
                         <div v-if="isBurning" class="mb-2">
+                            <h2 class="capitalize font-medium text-lg my-5">Total Burn Remains: {{ tokenDetail?.alreadyBurn }}</h2>
                             <label for="burnAmount" class="block text-lg">Amount to Burn:</label>
                             <input v-model="burnAmount" type="number" class="p-2 border rounded" placeholder="Enter amount to burn" />
+                        </div>
+                        <div v-if="isBurning" class="mb-2">
+                            <h2 class="capitalize font-medium text-lg my-5">Total share profit:</h2>
+                            <label for="burnAmount" class="block text-lg">Amount profit to pay:</label>
+                            <input v-model="profitShare" type="number" class="p-2 border rounded" placeholder="Enter amount to burn" />
                         </div>
                     </div>
                 </div>
                 <div class="mt-4 flex items-center justify-center space-x-4">
-                    <button @click="showMinting" class="bg-green-500 text-white p-2 rounded">Mint Token</button>
-                    <button @click="showburnging" class="bg-red-500 text-white p-2 rounded ml-2">Burn Token</button>
+                    <button v-if="tokenDetail?.status !== 'ongoing'" @click="showMinting" class="bg-green-500 text-white p-2 rounded">Mint Token</button>
+                    <button v-if="tokenDetail?.alreadyBurn !== tokenDetail?.totalBurn" @click="showburnging" class="bg-red-500 text-white p-2 rounded ml-2">Burn Token</button>
                     <button @click="withdrawFunds" class="bg-blue-500 text-white p-2 rounded ml-2">Withdraw</button>
                 </div>
             </div>
 
-            <div v-if="token && role !== 'admin'">
+            <div v-if="token && role !== 'admin' || tempAddress !== owner">
                 <div class="mt-4 flex items-center justify-center space-x-4">
                     <input v-model="buyAmount" type="number" placeholder="Amount to Buy" class="p-2 border rounded"/>
                     <button @click="buyToken" class="bg-blue-500 text-white p-2 rounded ml-2">Buy Token</button>
@@ -91,6 +101,7 @@
 <script>
 import { ethers } from "ethers";
 import abi from "../../../abi/tokenize/SimpleToken.js"; // ABI kontrak
+import apiMethods from '../../services/apiMothods';
 
 export default {
     data() {
@@ -107,74 +118,37 @@ export default {
             status: "",
             mintAmount: "",
             persentaseProfit: null,
+            total_burn: null,
             burnAmount: "", 
             buyAmount: "",
-            isConnected: false,
-            currentSignerAddress: "",
             isBurning: false,
+            tokenDetail: {},
+            profitShare: 0,
+            isWalletConnected: false,
+            tempAddress: false,
         };
-    },
-    mounted() {
-        this.checkMetaMaskConnection();
     },
     methods: {
         showMinting() {
             this.isBurning = false
             this.burnAmount = "";
-            console.log(this.mintAmount, this.persentaseProfit);
             if (this.mintAmount && this.persentaseProfit) {
                 this.mintToken()
             }
         },
+
         showburnging() {
             this.isBurning = true
             this.mintAmount = "";
             this.persentaseProfit = null;
+            this.total_burn =  null;
             if (this.burnAmount) {
                 this.burnToken()      
             }
         },
-        async connectMetaMask() {
-            if (!window.ethereum) {
-                this.status = "Please install MetaMask!";
-                return;
-            }
-            try {
-                // Meminta akses ke akun MetaMask
-                await window.ethereum.request({ method: "eth_requestAccounts" });
-
-                // Menghubungkan ke provider dan signer
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-
-                // Menyimpan alamat signer dan mengubah status koneksi
-                this.currentSignerAddress = await signer.getAddress();
-                this.isConnected = true;
-
-                // Mendapatkan data kontrak
-                this.getContractData();
-            } catch (error) {
-                console.error(error);
-                this.status = "Error connecting to MetaMask!";
-            }
-        },
-
-        async checkMetaMaskConnection() {
-            if (window.ethereum) {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-                const address = await signer.getAddress();
-                if (address) {
-                    this.isConnected = true;
-                    this.currentSignerAddress = address;
-                    this.getContractData();
-                }
-            }
-        },
 
         async getContractData() {
-            const contractAddress = this.$route.params.address;
-
+            const contractAddress = this.$route.params.address; 
             if (!window.ethereum) {
                 this.status = "Please install MetaMask!";
                 return;
@@ -196,7 +170,7 @@ export default {
                 this.tokenName = name;
                 this.tokenSymbol = symbol;
                 this.decimals = decimalCount;
-                this.owner = ownerAddress;
+                this.owner = ownerAddress.toLowerCase();
                 this.tokenPrice = price.toString()
                 this.totalSupply = supply.toString()
                 this.userBalance = userBalance.toString();
@@ -217,11 +191,20 @@ export default {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, abi, signer);
-                // const mintingQty = ethers.utils.parseEther(String(this.mintAmount)); // Mengkonversi jumlah ke dalam format wei
                 const tx = await contract.mint(signer.getAddress(), this.mintAmount);
-                await tx.wait(); // Tunggu transaksi selesai
+                await tx.wait();
                 this.status = `Minting successful! Transaction Hash: ${tx.hash}`;
-                this.getContractData(); // Perbarui data token setelah minting
+                if(tx){
+                    const body = {
+                        profitPersen: this.persentaseProfit,
+                        status: "ongoing",
+                        totalBurn: this.total_burn,
+                        totalSupply: this.totalSupply / Math.pow(10, 18),
+                    }
+                    
+                    this.updateTokens(body)
+                }
+                this.getContractData();
             } catch (error) {
                 console.error(error);
                 this.status = "Error minting token!";
@@ -239,9 +222,14 @@ export default {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, abi, signer);
-                const tx = await contract.burn(this.burnAmount);
+                const tx = await contract.burn(this.burnAmount, {
+                    value: ethers.utils.parseEther(String(this.profitShare)),
+                });
                 await tx.wait(); // Tunggu transaksi selesai
                 this.status = `Burning successful! Transaction Hash: ${tx.hash}`;
+                if(tx){
+                    this.updateAfterBurn()
+                }
                 this.getContractData(); // Perbarui data token setelah burning
             } catch (error) {
                 console.error(error);
@@ -290,7 +278,7 @@ export default {
 
                 // Tunggu transaksi selesai
                 await tx.wait();
-
+                this.buyAmount = "",
                 // Status sukses
                 this.status = `Token purchase successful! Transaction Hash: ${tx.hash}`;
                 this.getContractData(); // Update data setelah pembelian
@@ -302,11 +290,90 @@ export default {
                     this.status = "Error purchasing tokens!";
                 }
             }
+        },
+
+        async updateTokens(body) {
+            try {
+                const tokenId = this.$route.params.id;
+                const endpoint = "/token/update/" + tokenId                
+                await apiMethods.putData(endpoint, body);
+                this.mintAmount = "";
+                this.persentaseProfit = null;
+                this.total_burn =  null;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+
+        async updateAfterBurn() {
+            try {
+                this.total_burn = 0
+                const tokenId = this.$route.params.id;
+                const endpoint = "/token/update-burn/" + tokenId                
+                await apiMethods.putData(endpoint);
+                this.burnAmount = "";
+                this.fetchTokens();
+            } catch (error) {
+                console.log(error);
+            }
+        },
+
+        async fetchTokens() {
+            try {
+                const tokenId = this.$route.params.id;
+                const response = await apiMethods.getData(`/token/${tokenId}`);
+                this.tokenDetail = response;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+
+        async connectWallets() {
+            try {
+                if (typeof window.ethereum !== "undefined") {
+                const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+                    if (accounts.length > 0) {
+                        this.tempAddress = accounts[0];
+                        this.isWalletConnected = true;
+                        console.log("Wallet connected: ", this.tempAddress);
+                        this.getContractData();
+                    }
+                } else {
+                    console.log("Ethereum wallet is not connected.");
+                }
+            } catch (error) {
+                console.error('Error send message data:', error);
+                if (error?.message === "Invalid or expired token") {
+                    this.$router.push('/login')
+                }
+                this.$toast.open({
+                    message: "Something wrong with your wallet, please try again",
+                    type: 'error',
+                    duration: 3000,
+                    position: 'top-right'
+                });
+            }
+        },
+    },
+    mounted() {
+        this.fetchTokens();
+        this.connectWallets();
+
+        // Monitor wallet address changes
+        if (typeof window.ethereum !== "undefined") {
+        window.ethereum.on("accountsChanged", (accounts) => {
+            if (accounts.length > 0) {
+                this.tempAddress = accounts[0]; // Update tempAddress with the new address
+                console.log("Wallet address changed to: ", this.tempAddress);
+                this.isWalletConnected = true;
+                this.getContractData();
+            } else {
+                this.tempAddress = "";
+                this.isWalletConnected = false;
+                console.log("No wallet connected.");
+            }
+        });
         }
-    }
+    },
 };
 </script>
-
-<style scoped>
-/* Sesuaikan gaya CSS untuk tampilannya */
-</style>

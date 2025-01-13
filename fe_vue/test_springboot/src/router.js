@@ -60,7 +60,7 @@ const routes = [
         component: ListToken
       },
       {
-        path: 'detail/:address',
+        path: 'detail/:address/:id',
         name: 'detail-token',
         component: DetailToken
       },

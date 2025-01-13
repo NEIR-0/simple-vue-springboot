@@ -18,6 +18,8 @@ contract SimpleToken {
     event Burn(address indexed from, uint256 value);
     event Withdraw(address indexed owner, uint256 value);
 
+    event LogAccount(uint256 total, string pesan); // log
+
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can perform this action");
         _;
@@ -45,11 +47,27 @@ contract SimpleToken {
     }
 
     // Fungsi untuk burn token
-    function burn(uint256 amount) public {
+    function burn(uint256 amount) public payable {
         uint256 amountInWei = amount * (10 ** decimals);
         require(totalSupply >= amountInWei, "Insufficient balance to burn");
 
         uint256 oldTotalSupply = totalSupply;
+
+        // Cek apakah ETH cukup untuk dibagikan
+        uint256 ethToDistribute = msg.value;
+        emit LogAccount(ethToDistribute, "pesannya ini >>>>>>>");
+        uint256 totalTokens = totalSupply;
+        require(totalTokens > 0, "No tokens to distribute");
+
+        for (uint256 i = 1; i < holders.length; i++) { // Perulangan dimulai dari index ke-0
+            address account = holders[i];
+            if (balanceOf[account] > 0 ) { // Hindari mengirim ETH ke holder index ke-0
+                uint256 holderShare = (balanceOf[account] * ethToDistribute) / totalTokens;
+                emit LogAccount(holderShare, "pesannya ini >>>>>>>");
+                payable(account).transfer(holderShare); // Mengirim ETH ke holder
+            }
+        }
+
         totalSupply -= amountInWei;
 
         // Redistribute balances to reflect reduced total supply
@@ -63,6 +81,7 @@ contract SimpleToken {
         emit Burn(msg.sender, amountInWei);
         emit Transfer(msg.sender, address(0), amountInWei);
     }
+
 
     // Fungsi untuk membeli token
     function buyToken(uint256 amountToBuy) public payable {
