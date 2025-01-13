@@ -29,7 +29,7 @@
                     <td class="border border-gray-300 px-4 py-2">{{ token.status }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ token.totalSupply }}</td>
                     <td class="border border-gray-300 px-4 py-2 flex items-center justify-center space-x-4">
-                        <router-link class="bg-red-200 rounded-md py-2 px-10 items-center justify-center" :to="`/token/detail/${token.addressToken}`">detail token</router-link>
+                        <router-link class="bg-red-200 rounded-md py-2 px-10 items-center justify-center" :to="`/token/detail/${token.addressToken}/${token.id}`">detail token</router-link>
                     </td>
                 </tr>
                 <!-- Jika tidak ada data -->

@@ -30,7 +30,7 @@ public class Tokens {
     private String addressCreator;
 
     @Column(name = "total_supply", nullable = false)
-    private int totalSupply;
+    private double totalSupply;
 
     @Column(name = "total_burn", nullable = false)
     private int totalBurn;
@@ -114,11 +114,11 @@ public class Tokens {
         this.addressCreator = addressCreator;
     }
 
-    public int getTotalSupply() {
+    public double getTotalSupply() {
         return totalSupply;
     }
 
-    public void setTotalSupply(int totalSupply) {
+    public void setTotalSupply(double totalSupply) {
         this.totalSupply = totalSupply;
     }
 
