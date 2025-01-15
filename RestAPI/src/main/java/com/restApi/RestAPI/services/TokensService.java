@@ -8,10 +8,13 @@ import com.restApi.RestAPI.model.token.Tokens;
 import com.restApi.RestAPI.repository.TokensRepository;
 import com.restApi.RestAPI.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TokensService {
@@ -24,8 +27,46 @@ public class TokensService {
     @Autowired
     TokensRepository tokensRepository;
 
-    public List<Tokens> getAllTokens(){
-        return tokensRepository.findAllTokensOrderByCreatedAtDesc();
+    public Map<String, Object> getAllTokens(String userRole, String sort, String price, String profit, Integer page, Integer size) {
+        String sortField = "createdAt";
+        Sort.Direction direction = Sort.Direction.DESC;
+
+        if (sort != null) {
+            direction = "asc".equalsIgnoreCase(sort) ? Sort.Direction.ASC : Sort.Direction.DESC;
+            sortField = "createdAt";
+        }
+        else if (price != null) {
+            direction = "asc".equalsIgnoreCase(price) ? Sort.Direction.ASC : Sort.Direction.DESC;
+            sortField = "tokenPrice";
+        }
+        else if (profit != null) {
+            direction = "asc".equalsIgnoreCase(profit) ? Sort.Direction.ASC : Sort.Direction.DESC;
+            sortField = "profitPersen";
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+        Page<Tokens> tokensPage;
+        List<Tokens> totalTokens;
+
+        if (Objects.equals(userRole, "admin")) {
+            tokensPage = tokensRepository.findAllTokens(pageable);
+            totalTokens = tokensRepository.findAllTokensOrderByCreatedAtDesc();
+        } else {
+            List<Sort.Order> orders = new ArrayList<>();
+            pageable = PageRequest.of(page, size, Sort.by(orders));
+
+            tokensPage = tokensRepository.findAllOngoingTokensWithSupply(pageable);
+            totalTokens = tokensRepository.findAllOngoingTokensWithSupplyOrderByCreatedAtDesc();
+        }
+
+        // Membuat response map
+        Map<String, Object> response = new HashMap<>();
+        response.put("tokens", tokensPage.getContent());
+        response.put("totalPages", tokensPage.getTotalPages());
+        response.put("totalItems", totalTokens.size());
+
+        return response;
     }
 
     public Optional<Tokens> findById(Long tokenId) {

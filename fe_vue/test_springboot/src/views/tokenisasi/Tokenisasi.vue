@@ -63,6 +63,9 @@
     <!-- Status/Error -->
     <p v-if="responseError" class="mt-4 text-red-500">{{ responseError }}</p>
   </div>
+
+  <!-- modal -->
+  <ModalsContainer />
 </template>
 
 <script>
@@ -70,8 +73,14 @@ import { ethers } from "ethers";
 import abi from "../../../abi/tokenize/SimpleToken.js";
 import bytecode from "../../../abi/tokenize/byteCodeSimpleToken.js";
 import apiMethods from "../../services/apiMothods";
+import { ModalsContainer, useModal } from 'vue-final-modal'
+import Modal from '../../components/modal/StatusModal.vue'
 
 export default {
+  components: {
+        Modal,
+        ModalsContainer,
+    },
   data() {
     return {
       tokenName: "",
@@ -82,6 +91,17 @@ export default {
     };
   },
   methods: {
+    openModal() {
+      const { open, close } = useModal({
+          component: Modal,
+          attrs: {
+            title: "Deploy Token on Progress...",
+            responseMessage: "Please wait for a while, your transaction is being processed",
+            isShowButton: true
+          },
+      });
+      open()
+    },
     // Fungsi untuk koneksi ke MetaMask
     async connectMetaMask() {
       if (!window.ethereum) {
@@ -128,10 +148,11 @@ export default {
         );
         await contract.deployed(); // Tunggu kontrak selesai di-deploy
         const deployedContractAddress = contract.address;
-
         console.log("Token deployed at:", deployedContractAddress);
 
         if (deployedContractAddress) {
+          this.openModal();
+
           const body = {
             symbol: this.tokenSymbol,
             name: this.tokenName,

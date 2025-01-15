@@ -10,9 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/token")
@@ -21,9 +22,19 @@ public class TokensController {
     private TokensService tokensService;
 
     @GetMapping
-    public List<TokenDTO> getAllTokens(){
-        List<Tokens> tokensList =  tokensService.getAllTokens();
-        return tokensList.stream().map(token ->
+    public Map<String, Object> getAllTokens(
+            @RequestParam(value = "sort", required = false) String sort,
+            @RequestParam(value = "price", required = false) String price,
+            @RequestParam(value = "profit", required = false) String profit,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size,
+            HttpServletRequest request
+    ){
+        String userRole = (String) request.getAttribute("userRole");
+        Map<String, Object> tokensData = tokensService.getAllTokens(userRole, sort, price, profit, page, size);
+
+        // Mapping data tokens ke DTO
+        List<TokenDTO> tokenDTOList = ((List<Tokens>) tokensData.get("tokens")).stream().map(token ->
                 new TokenDTO(
                         token.getId(),
                         token.getName(),
@@ -36,7 +47,14 @@ public class TokensController {
                         token.getTotalBurn(),
                         token.getAlreadyBurn()
                 )
-        ).collect(Collectors.toList());
+        ).toList();
+
+        // Kembalikan response dengan data paginasi
+        Map<String, Object> response = new HashMap<>();
+        response.put("tokens", tokenDTOList);
+        response.put("totalPages", tokensData.get("totalPages"));
+        response.put("totalItems", tokensData.get("totalItems"));
+        return response;
     }
 
     @GetMapping("/{tokenId}")

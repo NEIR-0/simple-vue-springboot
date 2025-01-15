@@ -29,7 +29,7 @@ public class ProeductsController {
     public ProductsDTO getAllProducts(
         @RequestParam(value = "search", required = false) String search,
         @RequestParam(value = "duration", required = false) Integer duration,
-         @RequestParam(value = "page", defaultValue = "0") Integer page,
+        @RequestParam(value = "page", defaultValue = "0") Integer page,
         @RequestParam(value = "size", defaultValue = "10") Integer size
     ){
         return productsService.getAllProducts(search, duration);
