@@ -1,7 +1,12 @@
 <template>
     <div class="w-full h-fit flex items-center justify-center flex-col pt-36">
-        <div class="absolute top-20 right-20">
+        <div v-if="token && role === 'admin'"  class="absolute top-20 right-20">
             <router-link class="bg-red-200 rounded-md py-2 px-10 items-center justify-center" to="/token/create">+ create token</router-link>
+        </div>
+        <div class="w-3/4 flex items-center justify-start space-x-4 mb-6">
+            <button @click="sortingByCreated" class="px-7 py-2 rounded ml-2 border-[1px] text-sm capitalize font-medium duration-300 ease-in-out hover:bg-stone-300" :class="sort && 'bg-stone-600 text-white'">{{sort === "desc" ? "Lastet" : "oldest"}}</button>
+            <button @click="sortingByPrice" class="px-7 py-2 rounded ml-2 border-[1px] text-sm capitalize font-medium duration-300 ease-in-out hover:bg-stone-300" :class="price && 'bg-stone-600 text-white'">{{price === "desc" ? "Highest Price" : "Lowest Price"}}</button>
+            <button @click="sortingByProfit" class="px-7 py-2 rounded ml-2 border-[1px] text-sm capitalize font-medium duration-300 ease-in-out hover:bg-stone-300" :class="profit && 'bg-stone-600 text-white'">{{profit === "desc" ? "Highest Profit" : "Lowest Profit"}}</button>
         </div>
         <table class="table-auto border-collapse border border-gray-300 w-3/4">
             <thead class="bg-gray-200">
@@ -29,7 +34,7 @@
                     <td class="border border-gray-300 px-4 py-2">{{ token.status }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ token.totalSupply }}</td>
                     <td class="border border-gray-300 px-4 py-2 flex items-center justify-center space-x-4">
-                        <router-link class="bg-red-200 rounded-md py-2 px-10 items-center justify-center" :to="`/token/detail/${token.addressToken}/${token.id}`">detail token</router-link>
+                        <router-link class="bg-blue-500 text-white font-medium capitalize rounded-md py-2 px-10 items-center justify-center" :to="`/token/detail/${token.addressToken}/${token.id}`">detail token</router-link>
                     </td>
                 </tr>
                 <!-- Jika tidak ada data -->
@@ -48,8 +53,6 @@
 
 <script>
 import apiMethods from '../../services/apiMothods';
-import { ethers } from "ethers";
-import abi from "../../../abi/tokenize/SimpleToken.js";
 
 export default {
     data() {
@@ -57,17 +60,74 @@ export default {
             tokens: [],
             currentSignerAddress: "",
             isConnected: false,
+            token: localStorage.getItem('token'),
+            role: localStorage.getItem('role'),
+            sort: "",
+            price: "",
+            profit: "",
+            currentPage: 0,
+            totalPages: 0,
+            pageSize: 10,
         };
     },
     methods: {
-        async fetchTokens() {
+        async fetchTokens(sort, price, profit) {
             try {
-                const response = await apiMethods.getData("/token");
-                this.tokens = response;
+                let params = {
+                    page: this.currentPage,
+                    size: this.pageSize,
+                    sort: sort ? sort : this.sort,
+                    price: price ? price : this.price,
+                    profit: profit ? profit : this.profit,
+                }
+
+                const response = await apiMethods.getData("/token", params);
+                this.totalPages = Math.ceil(response?.totalPages / this.pageSize);
+                this.tokens = response?.tokens;
             } catch (error) {
-                console.log(error);
+                console.error('Error send message data:', error);
+                if (error?.message === "Invalid or expired token") {
+                    this.$router.push('/login')
+                }
             }
         },
+
+        sortingByCreated () {
+            if(this.sort === "desc") {
+                this.sort = "asc"
+                this.price = null
+                this.profit = null
+            }else{
+                this.sort = "desc"
+                this.price = null
+                this.profit = null
+            }
+            this.fetchTokens(this.sort, this.price, this.profit)
+        },
+        sortingByPrice () {
+            if(this.price === "desc") {
+                this.price = "asc"
+                this.sort = null
+                this.profit = null
+            }else{
+                this.price = "desc"
+                this.sort = null
+                this.profit = null
+            }
+            this.fetchTokens(this.sort, this.price, this.profit)
+        },
+        sortingByProfit () {
+            if(this.profit === "desc") {
+                this.profit = "asc"
+                this.price = null
+                this.sort = null
+            }else{
+                this.profit = "desc"
+                this.price = null
+                this.sort = null
+            }
+            this.fetchTokens(this.sort, this.price, this.profit)
+        }
     },
     mounted() {
         this.fetchTokens();

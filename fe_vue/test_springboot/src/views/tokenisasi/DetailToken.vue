@@ -6,51 +6,54 @@
         </div>
 
         <!-- Info token dan tombol lainnya jika MetaMask terhubung -->
-        <div v-if="isWalletConnected">
-            <h1 class="text-2xl font-semibold mb-4">Token Information</h1>
+        <div v-if="isWalletConnected" class="w-full flex items-center justify-center flex-col space-y-10">
+            <div class="w-full flex-col flex items-center justify-center">
+                <h1 class="text-2xl font-semibold mb-2">Token Information</h1>
+                <div class="h-1 w-1/5 bg-slate-600"></div>
+            </div>
 
             <!-- Tabel untuk menampilkan data token -->
-            <table class="table-auto border-collapse border border-gray-300 w-1/2">
+            <table class="table-auto border-collapse w-1/2 shadow-lg">
                 <thead>
                     <tr>
-                        <th class="border px-4 py-2">Attribute</th>
-                        <th class="border px-4 py-2">Value</th>
+                        <th class="border border-gray-500  px-4 py-2">Attribute</th>
+                        <th class="border border-gray-500  px-4 py-2">Value</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="border px-4 py-2">Token Name</td>
-                        <td class="border px-4 py-2">{{ tokenName }}</td>
+                        <td class="border border-gray-500  px-4 py-2">Token Name</td>
+                        <td class="border border-gray-500  px-4 py-2">{{ tokenName }}</td>
                     </tr>
                     <tr>
-                        <td class="border px-4 py-2">Token Symbol</td>
-                        <td class="border px-4 py-2">{{ tokenSymbol }}</td>
+                        <td class="border border-gray-500  px-4 py-2">Token Symbol</td>
+                        <td class="border border-gray-500  px-4 py-2">{{ tokenSymbol }}</td>
                     </tr>
                     <tr>
-                        <td class="border px-4 py-2">Token Price</td>
-                        <td class="border px-4 py-2">{{ tokenPrice }}</td>
+                        <td class="border border-gray-500  px-4 py-2">Token Price</td>
+                        <td class="border border-gray-500  px-4 py-2">{{ tokenPrice }}</td>
                     </tr>
                     <tr>
-                        <td class="border px-4 py-2">Total Supply</td>
-                        <td class="border px-4 py-2">{{ totalSupply }}</td>
+                        <td class="border border-gray-500  px-4 py-2">Total Supply</td>
+                        <td class="border border-gray-500  px-4 py-2">{{ totalSupply }}</td>
                     </tr>
                     <tr>
-                        <td class="border px-4 py-2">Decimals</td>
-                        <td class="border px-4 py-2">{{ decimals }}</td>
+                        <td class="border border-gray-500  px-4 py-2">Decimals</td>
+                        <td class="border border-gray-500  px-4 py-2">{{ decimals }}</td>
                     </tr>
                     <tr>
-                        <td class="border px-4 py-2">Owner</td>
-                        <td class="border px-4 py-2">{{ owner }}</td>
+                        <td class="border border-gray-500  px-4 py-2">Owner</td>
+                        <td class="border border-gray-500  px-4 py-2">{{ owner }}</td>
                     </tr>
                     <tr>
-                        <td class="border px-4 py-2">Balance of User</td>
-                        <td class="border px-4 py-2">{{ userBalance }}</td>
+                        <td class="border border-gray-500  px-4 py-2">Balance of User</td>
+                        <td class="border border-gray-500  px-4 py-2">{{ userBalance }}</td>
                     </tr>
                 </tbody>
             </table>
 
             <div v-if="token && role === 'admin' && tempAddress === owner">
-                <div class="mt-4 flex items-center justify-center space-x-4">
+                <div v-if="totalSupply <= 0" class="mt-4 flex items-center justify-center space-x-4">
                     <div v-if="!isBurning" class="flex items-center justify-center space-x-4">
                         <div class="mb-2">
                             <label for="mintAmount" class="block text-lg">Amount to Mint:</label>
@@ -301,7 +304,10 @@ export default {
                 this.persentaseProfit = null;
                 this.total_burn =  null;
             } catch (error) {
-                console.log(error);
+                console.error('Error send message data:', error);
+                if (error?.message === "Invalid or expired token") {
+                    this.$router.push('/login')
+                }
             }
         },
 
@@ -314,7 +320,10 @@ export default {
                 this.burnAmount = "";
                 this.fetchTokens();
             } catch (error) {
-                console.log(error);
+                console.error('Error send message data:', error);
+                if (error?.message === "Invalid or expired token") {
+                    this.$router.push('/login')
+                }
             }
         },
 
@@ -324,7 +333,10 @@ export default {
                 const response = await apiMethods.getData(`/token/${tokenId}`);
                 this.tokenDetail = response;
             } catch (error) {
-                console.log(error);
+                console.error('Error send message data:', error);
+                if (error?.message === "Invalid or expired token") {
+                    this.$router.push('/login')
+                }
             }
         },
 
