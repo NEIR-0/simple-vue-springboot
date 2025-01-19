@@ -60,12 +60,28 @@
                             <input v-model="mintAmount" type="number" class="p-2 border rounded" placeholder="Enter amount to mint" />
                         </div>
                         <div class="mb-2">
-                            <label for="persentaseProfit" class="block text-lg">Persentase Profit:</label>
-                            <input v-model="persentaseProfit" type="number" class="p-2 border rounded" placeholder="Enter amount to mint" />
+                            <label for="persentaseProfit" class="block text-lg">Persentase Profit (%) :</label>
+                            <input v-model="persentaseProfit" type="number" class="p-2 border rounded" placeholder="Enter Persentase Profit" />
                         </div>
                         <div class="mb-2">
-                            <label for="total_burn" class="block text-lg">Total Burn:</label>
-                            <input v-model="total_burn" type="number" class="p-2 border rounded" placeholder="Enter amount to mint" />
+                            <label for="total_burn" class="block text-lg">Choose Total Burn:</label>
+                            <select
+                                v-model="total_burn"
+                                id="total_burn"
+                                class="bg-white border border-gray-200 text-slate-900 text-sm rounded w-full p-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                <option v-for="burn in totalBurn" :value="burn">{{burn}}</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label for="time_burn" class="block text-lg">Choose Burning Time:</label>
+                            <select
+                                v-model="time_burn"
+                                id="time_burn"
+                                class="bg-white border border-gray-200 text-slate-900 text-sm rounded w-full p-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                <option v-for="time in timeBurn" :value="time">{{time}}</option>
+                            </select>
                         </div>
                     </div>
     
@@ -85,7 +101,7 @@
                 <div class="mt-4 flex items-center justify-center space-x-4">
                     <button v-if="tokenDetail?.status !== 'ongoing'" @click="showMinting" class="bg-green-500 text-white p-2 rounded">Mint Token</button>
                     <button v-if="tokenDetail?.alreadyBurn !== tokenDetail?.totalBurn" @click="showburnging" class="bg-red-500 text-white p-2 rounded ml-2">Burn Token</button>
-                    <button @click="withdrawFunds" class="bg-blue-500 text-white p-2 rounded ml-2">Withdraw</button>
+                    <button v-if="userBalance > 0" @click="withdrawFunds" class="bg-blue-500 text-white p-2 rounded ml-2">Withdraw</button>
                 </div>
             </div>
 
@@ -127,8 +143,11 @@ export default {
             isBurning: false,
             tokenDetail: {},
             profitShare: 0,
+            time_burn: null,
             isWalletConnected: false,
             tempAddress: false,
+            totalBurn: [1,2,3,4],
+            timeBurn: ["Monthly (per Month)", "Quarterly (per 3 month)", "Half Yearly (per 6 month)", "Yearly (per 12 month)"]
         };
     },
     methods: {
@@ -198,13 +217,15 @@ export default {
                 await tx.wait();
                 this.status = `Minting successful! Transaction Hash: ${tx.hash}`;
                 if(tx){
+                    const payPerBurn = this.calculateProfitPerBurn(this.mintAmount, this.persentaseProfit, this.total_burn)
                     const body = {
                         profitPersen: this.persentaseProfit,
                         status: "ongoing",
                         totalBurn: this.total_burn,
                         totalSupply: this.totalSupply / Math.pow(10, 18),
+                        payPerBurn,
+                        time_burn: this.time_burn
                     }
-                    
                     this.updateTokens(body)
                 }
                 this.getContractData();
@@ -213,7 +234,11 @@ export default {
                 this.status = "Error minting token!";
             }
         },
-
+        calculateProfitPerBurn(totalToken, profitPercentage, totalBurn) {
+            const totalProfit = totalToken * (profitPercentage / 100);
+            const profitPerBurn = totalProfit / totalBurn;
+            return profitPerBurn;
+        },
         async burnToken() {
             const contractAddress = this.$route.params.address;
 

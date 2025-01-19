@@ -48,6 +48,13 @@
                 </tr>
             </tbody>
         </table>
+
+        <!-- Pagination Controls -->
+        <div class="w-full flex items-center justify-center mt-4 pb-10 space-x-5">
+            <button v-if="currentPage > 0" @click="prevPage(currentPage - 1)" class="px-4 py-2 bg-blue-500 text-white rounded mr-2">Previous</button>
+            <span>Page {{ currentPage + 1 }}</span>
+            <button v-if="currentPage != totalPages - 1" @click="nextPage(currentPage + 1)" class="px-4 py-2 bg-blue-500 text-white rounded ml-2">Next</button>
+        </div>
     </div>
 </template>
 
@@ -71,6 +78,14 @@ export default {
         };
     },
     methods: {
+        prevPage(page) {
+            this.currentPage = page;
+            this.fetchTokens(this.sort, this.price, this.profit)
+        },
+        nextPage(page) {
+            this.currentPage = page;
+            this.fetchTokens(this.sort, this.price, this.profit)
+        },
         async fetchTokens(sort, price, profit) {
             try {
                 let params = {
@@ -82,7 +97,7 @@ export default {
                 }
 
                 const response = await apiMethods.getData("/token", params);
-                this.totalPages = Math.ceil(response?.totalPages / this.pageSize);
+                this.totalPages = response?.totalPages
                 this.tokens = response?.tokens;
             } catch (error) {
                 console.error('Error send message data:', error);

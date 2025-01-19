@@ -59,9 +59,6 @@
         Deploy Token
       </button>
     </div>
-
-    <!-- Status/Error -->
-    <p v-if="responseError" class="mt-4 text-red-500">{{ responseError }}</p>
   </div>
 
   <!-- modal -->
@@ -86,26 +83,38 @@ export default {
       tokenName: "",
       tokenSymbol: "",
       tokenPrice: "",
-      walletConnected: false, // Status koneksi wallet
-      responseError: "", // Pesan error atau status
+      walletConnected: false,
+      modalInstance: null,
     };
   },
   methods: {
     openModal() {
-      const { open, close } = useModal({
-          component: Modal,
-          attrs: {
-            title: "Deploy Token on Progress...",
-            responseMessage: "Please wait for a while, your transaction is being processed",
-            isShowButton: true
-          },
+      this.modalInstance = useModal({
+        component: Modal,
+        attrs: {
+          title: "Deploy Token on Progress...",
+          responseMessage: "Please wait for a while, your transaction is being processed",
+          isShowButton: false, // Bisa atur true/false
+        },
       });
-      open()
+      this.modalInstance.open();
+    },
+
+    closeModal() {
+      if (this.modalInstance) {
+        this.modalInstance.close();
+        this.modalInstance = null; // Bersihkan instance modal
+      }
     },
     // Fungsi untuk koneksi ke MetaMask
     async connectMetaMask() {
       if (!window.ethereum) {
-        this.responseError = "Please install MetaMask!";
+        this.$toast.open({
+          message: "Please install MetaMask!",
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
         return;
       }
       try {
@@ -114,23 +123,41 @@ export default {
         });
         console.log("Connected account:", accounts[0]);
         this.walletConnected = true; // Set walletConnected ke true
-        this.responseError = ""; // Clear error
       } catch (error) {
         console.error("Error connecting wallet:", error);
-        this.responseError = "Error connecting to MetaMask!";
+        if (error?.message === "Invalid or expired token") {
+          this.$router.push('/login')
+        }else{
+          this.$toast.open({
+            message: "Error connecting to MetaMask!",
+            type: 'error',
+            duration: 3000,
+            position: 'top-right'
+          });
+        }
       }
     },
 
     // Fungsi untuk deploy token
     async deployToken() {
       if (!window.ethereum) {
-        this.responseError = "Please install MetaMask!";
+        this.$toast.open({
+          message: "Please install MetaMask!",
+          type: 'error',
+          duration: 3000,
+          position: 'top-right'
+        });
         return;
       }
 
       try {
         if (!this.tokenName || !this.tokenSymbol || !this.tokenPrice) {
-          this.responseError = "All inputs are required!";
+          this.$toast.open({
+            message: "All inputs are required!",
+            type: 'error',
+            duration: 3000,
+            position: 'top-right'
+          });
           return;
         }
 
@@ -169,10 +196,20 @@ export default {
           };
 
           await this.createTokenDb(body);
+          this.closeModal()
         }
       } catch (error) {
-        console.error(error);
-        this.responseError = "Error deploying token!";
+        console.error("Error message: ", error);
+        if (error?.message === "Invalid or expired token") {
+          this.$router.push('/login')
+        }else{
+          this.$toast.open({
+            message: "Error deploying token!",
+            type: 'error',
+            duration: 3000,
+            position: 'top-right'
+          });
+        }
       }
     },
 
@@ -180,11 +217,22 @@ export default {
     async createTokenDb(body) {
       try {
         const response = await apiMethods.postData("/token/create", body);
-        console.log(response, ">>>>>>");
-        this.$router.push("/token"); // Redirect ke halaman token
+        if (response) {
+          const [title, userId] = response?.msg.split('-');
+          this.$router.push("/token?userId="+userId); // Redirect ke halaman token
+        }
       } catch (error) {
         console.error("Error saving token to DB:", error);
-        this.responseError = "Error saving token to the database!";
+        if (error?.message === "Invalid or expired token") {
+          this.$router.push('/login')
+        }else{
+          this.$toast.open({
+            message: "Error saving token to the database!",
+            type: 'error',
+            duration: 3000,
+            position: 'top-right'
+          });
+        }
       }
     },
   },

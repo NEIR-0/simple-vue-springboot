@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.model.message.Messages;
+import com.restApi.RestAPI.model.notification.Notifications;
 import com.restApi.RestAPI.model.token.Tokens;
 import com.restApi.RestAPI.model.transaction.Transactions;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -45,9 +46,23 @@ public class RabbitMQSenderService {
         return (String) amqpTemplate.convertSendAndReceive("myExchange", "message.routing.key", createMessageJson);
     }
 
-    public void sendMessageForTokens(Tokens inputUser) throws JsonProcessingException {
+    public Long sendMessageForTokens(Tokens inputUser) throws JsonProcessingException {
         System.out.println("CreateToken message sent to RabbitMQ: " + inputUser);
         String createMessageJson = objectMapper.writeValueAsString(inputUser);
-        amqpTemplate.convertSendAndReceive("myExchange", "token.routing.key", createMessageJson);
+        String response = (String) amqpTemplate.convertSendAndReceive("myExchange", "token.routing.key", createMessageJson);
+        if (response != null) {
+            Long tokenId = Long.parseLong(response);
+            System.out.println("Response received from RabbitMQ: Tokens ID = " + tokenId);
+            return tokenId;
+        } else {
+            System.out.println("No response received from RabbitMQ.");
+            return null;
+        }
+    }
+
+    public void sendMessageForNotif(Notifications inputUser) throws JsonProcessingException {
+        System.out.println("Notifications message sent to RabbitMQ: " + inputUser);
+        String NotificationJson = objectMapper.writeValueAsString(inputUser);
+        amqpTemplate.convertAndSend("myExchange", "notif.routing.key", NotificationJson);
     }
 }

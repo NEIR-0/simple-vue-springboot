@@ -38,7 +38,7 @@ public class WebConfig implements WebMvcConfigurer {
     public FilterRegistrationBean<JwtFilter> jwtFilterRegistration() {
         FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(jwtFilter);
-        registrationBean.addUrlPatterns("/users/*", "/products/*", "/message/*", "/token/*"); // Terapkan hanya untuk path tertentu
+        registrationBean.addUrlPatterns("/users/*", "/products/*", "/message/*", "/token/*", "/notification/*"); // Terapkan hanya untuk path tertentu
         return registrationBean;
     }
 }

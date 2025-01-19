@@ -27,6 +27,10 @@ public class RabbitConfig {
     public Queue tokenQueue() {
         return new Queue("tokenQueue", true);
     }
+    @Bean
+    public Queue notifQueue() {
+        return new Queue("notifQueue", true);
+    }
 
     // Mendefinisikan Exchange
     @Bean
@@ -54,5 +58,10 @@ public class RabbitConfig {
     @Bean
     public Binding bindingTokenQueue(Queue tokenQueue, TopicExchange exchange) {
         return BindingBuilder.bind(tokenQueue).to(exchange).with("token.routing.key");
+    }
+
+    @Bean
+    public Binding bindingNotifQueue(Queue notifQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(notifQueue).to(exchange).with("notif.routing.key");
     }
 }
