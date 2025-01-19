@@ -3,9 +3,11 @@ package com.restApi.RestAPI.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.model.message.Messages;
+import com.restApi.RestAPI.model.notification.Notifications;
 import com.restApi.RestAPI.model.token.Tokens;
 import com.restApi.RestAPI.model.transaction.Transactions;
 import com.restApi.RestAPI.repository.MessagesRepository;
+import com.restApi.RestAPI.repository.NotificationsRepository;
 import com.restApi.RestAPI.repository.TokensRepository;
 import com.restApi.RestAPI.repository.TransactionsRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -28,6 +30,9 @@ public class RabbitMQReceiverService {
 
     @Autowired
     TokensRepository tokensRepository;
+
+    @Autowired
+    NotificationsService notificationsService;
 
     @RabbitListener(queues = "transactionQueue")
     public String receiveTransaction(String transactionJson) {
@@ -85,17 +90,37 @@ public class RabbitMQReceiverService {
 
 
     @RabbitListener(queues = "tokenQueue")
-    public void receiveTokenCreate(String registerUserJson) {
+    public String receiveTokenCreate(String registerUserJson) {
         try {
             // Konversi JSON ke objek Transactions
             Tokens tokenCreate = objectMapper.readValue(registerUserJson, Tokens.class);
             System.out.println("Processing create Message user in the background: " + tokenCreate);
-            processTokenCreate(tokenCreate);
+            Tokens savedTokens = processTokenCreate(tokenCreate);
+            return String.valueOf(savedTokens.getId());
+        } catch (Exception e) {
+            System.out.println("Error processing register user: " + e.getMessage());
+            return null; // Kembalikan null jika terjadi error
+        }
+    }
+    private Tokens processTokenCreate(Tokens inputUser) {
+        Tokens savedTokens = tokensRepository.save(inputUser);
+        System.out.println("Transaction processed id: " + savedTokens.getId());
+        return savedTokens;
+    }
+
+    @RabbitListener(queues = "notifQueue")
+    public void receiveNotificationsUser(String notificationsJson) {
+        try {
+            // Konversi JSON ke objek Transactions
+            Notifications notification = objectMapper.readValue(notificationsJson, Notifications.class);
+            System.out.println("Processing notification user in the background: " + notification);
+            processNotificationsUser(notification);
         } catch (Exception e) {
             System.out.println("Error processing register user: " + e.getMessage());
         }
     }
-    private void processTokenCreate(Tokens inputUser) {
-        tokensRepository.save(inputUser);
+    private void processNotificationsUser(Notifications inputUser) {
+        String savedTransaction = notificationsService.createNotifications(inputUser);
+        System.out.println(savedTransaction);
     }
 }

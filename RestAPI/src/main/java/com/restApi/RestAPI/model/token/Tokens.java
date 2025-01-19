@@ -54,8 +54,18 @@ public class Tokens {
     @Column(name = "address_token", nullable = false)
     private String addressToken;
 
+    @Column(name = "burn_tempo")
+    private String burnTempo;
+
     @OneToMany(mappedBy = "token", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvestorTokens> investorTokens;
+
+    @Column(name = "burn_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date burnDate;
+
+    @Column(name = "pay_per_burn")
+    private double payPerBurn;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -81,6 +91,14 @@ public class Tokens {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public String getBurnTempo() {
+        return burnTempo;
+    }
+
+    public void setBurnTempo(String burnTempo) {
+        this.burnTempo = burnTempo;
     }
 
     public Users getCreatorId() {
@@ -120,6 +138,14 @@ public class Tokens {
 
     public void setTotalSupply(double totalSupply) {
         this.totalSupply = totalSupply;
+    }
+
+    public double getPayPerBurn() {
+        return payPerBurn;
+    }
+
+    public void setPayPerBurn(double payPerBurn) {
+        this.payPerBurn = totalSupply;
     }
 
     public int getTotalBurn() {
@@ -184,6 +210,14 @@ public class Tokens {
 
     public void setInvestorTokens(List<InvestorTokens> investorTokens) {
         this.investorTokens = investorTokens;
+    }
+
+    public Date getBurnDate() {
+        return burnDate;
+    }
+
+    public void setBurnDate(Date burnDate) {
+        this.burnDate = burnDate;
     }
 
     public Date getCreatedAt() {

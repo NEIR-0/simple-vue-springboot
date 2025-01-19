@@ -88,6 +88,31 @@ class WebSocketService {
     }
   }
 
+  UpdateNotificationRealTime(payload) {   
+    if (this.stompClient) {
+      this.stompClient.send(
+        '/app/responseNotifications',
+        {},                    
+        JSON.stringify(payload)
+      );
+    }
+  }
+
+  responseNotificationRealTime(callback) {
+    const socket = new SockJS(baseUrl + '/ws');
+    this.stompClient = Stomp.over(socket);
+    this.stompClient.debug = null // disable log
+
+    this.stompClient.connect({}, (frame) => {
+      console.log('Connected: ' + frame);
+      
+      this.stompClient.subscribe('/topic/responseNotifications', (messageOutput) => {
+        const newMessage = JSON.parse(messageOutput.body);
+        callback(newMessage);
+      });
+    });
+  }
+
   // Disconnect WebSocket connection
   disconnect() {
     if (this.stompClient) {

@@ -2,23 +2,23 @@
 import { VueFinalModal } from 'vue-final-modal'
 
 defineProps<{
-    title?: string,
-    responseMessage?: string
-    isShowButton?: boolean
+  title?: string,
+  responseMessage?: string,
+  isShowButton?: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', modelValue: boolean): void
+  (e: 'close'): void
 }>()
 </script>
 
 <template>
   <VueFinalModal
     class="flex justify-center items-center"
-    @update:model-value="val => emit('update:modelValue', val)"
+    v-slot="{ close }"
   >
     <div class="w-fit h-fit p-20 rounded-md bg-white relative flex flex-col items-center justify-center">
-        <button v-if="!isShowButton" class="absolute top-5 right-5 text-xl text-slate-500 font-bold duration-300 ease-in-out hover:text-slate-800" @click="emit('update:modelValue', false)">X</button>
+        <!-- <button v-if="!isShowButton" class="absolute top-5 right-5 text-xl text-slate-500 font-bold duration-300 ease-in-out hover:text-slate-800" @click="emit('close'); close()">X</button> -->
         <div class="w-[250px] h-[250px] flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
             <g transform="translate(50, 50)">
