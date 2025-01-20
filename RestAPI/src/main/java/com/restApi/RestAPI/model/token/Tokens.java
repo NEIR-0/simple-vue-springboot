@@ -32,6 +32,9 @@ public class Tokens {
     @Column(name = "total_supply", nullable = false)
     private double totalSupply;
 
+    @Column(name = "amount_per_burning", nullable = false)
+    private double amountPerBurning;
+
     @Column(name = "total_burn", nullable = false)
     private int totalBurn;
 
@@ -40,7 +43,11 @@ public class Tokens {
 
     @Column(name = "is_approve", nullable = false)
     @JsonProperty("isApprove")
-    private boolean isApprove;
+    private Boolean isApprove;
+
+    @Column(name = "is_withdraw", nullable = false)
+    @JsonProperty("isWithdraw")
+    private Boolean isWithdraw;
 
     @Column(name = "token_price", nullable = false)
     private int tokenPrice;
@@ -140,12 +147,20 @@ public class Tokens {
         this.totalSupply = totalSupply;
     }
 
+    public double getAmountPerBurning() {
+        return amountPerBurning;
+    }
+
+    public void setAmountPerBurning(double amountPerBurning) {
+        this.amountPerBurning = amountPerBurning;
+    }
+
     public double getPayPerBurn() {
         return payPerBurn;
     }
 
     public void setPayPerBurn(double payPerBurn) {
-        this.payPerBurn = totalSupply;
+        this.payPerBurn = payPerBurn;
     }
 
     public int getTotalBurn() {
@@ -164,11 +179,19 @@ public class Tokens {
         this.alreadyBurn = alreadyBurn;
     }
 
-    public boolean isApprove() {
+    public Boolean isWithdraw() {
+        return isWithdraw;
+    }
+
+    public void setWithdraw(Boolean isWithdraw) {
+        this.isWithdraw = isWithdraw;
+    }
+
+    public Boolean isApprove() {
         return isApprove;
     }
 
-    public void setApprove(boolean isApprove) {
+    public void setApprove(Boolean isApprove) {
         this.isApprove = isApprove;
     }
 

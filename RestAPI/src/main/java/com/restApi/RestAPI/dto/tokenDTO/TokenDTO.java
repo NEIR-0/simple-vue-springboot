@@ -1,5 +1,8 @@
 package com.restApi.RestAPI.dto.tokenDTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+
 public class TokenDTO {
     private String name;
     private int tokenPrice;
@@ -11,9 +14,12 @@ public class TokenDTO {
     private Long id;
     private int totalBurn;
     private int alreadyBurn;
+    private double amountPerBurning;
+    private double payPerBurn;
+    private boolean isWithdraw;
 
     // Constructor
-    public TokenDTO(Long id, String name, int tokenPrice, String symbol, int profitPersen, String status, double totalSupply, String addressToken, int totalBurn, int alreadyBurn) {
+    public TokenDTO(Long id, String name, int tokenPrice, String symbol, int profitPersen, String status, double totalSupply, String addressToken, int totalBurn, int alreadyBurn, double amountPerBurning, double payPerBurn, boolean isWithdraw) {
         this.id = id;
         this.name = name;
         this.tokenPrice = tokenPrice;
@@ -24,6 +30,9 @@ public class TokenDTO {
         this.totalSupply = totalSupply;
         this.addressToken = addressToken;
         this.alreadyBurn = alreadyBurn;
+        this.amountPerBurning = amountPerBurning;
+        this.payPerBurn = payPerBurn;
+        this.isWithdraw = isWithdraw;
     }
 
     // Getters and Setters
@@ -33,6 +42,14 @@ public class TokenDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isWithdraw() {
+        return isWithdraw;
+    }
+
+    public void setWithdraw(boolean isWithdraw) {
+        this.isWithdraw = isWithdraw;
     }
 
     public String getAddressToken() {
@@ -59,6 +76,13 @@ public class TokenDTO {
         this.totalBurn = totalBurn;
     }
 
+    public double getPayPerBurn() {
+        return payPerBurn;
+    }
+
+    public void setPayPerBurn(double payPerBurn) {
+        this.payPerBurn = payPerBurn;
+    }
 
     public String getSymbol() {
         return symbol;
@@ -94,6 +118,14 @@ public class TokenDTO {
 
     public double getTotalSupply() {
         return totalSupply;
+    }
+
+    public double getAmountPerBurning() {
+        return amountPerBurning;
+    }
+
+    public void setAmountPerBurning(double amountPerBurning) {
+        this.amountPerBurning = amountPerBurning;
     }
 
     public void setTotalSupply(double totalSupply) {

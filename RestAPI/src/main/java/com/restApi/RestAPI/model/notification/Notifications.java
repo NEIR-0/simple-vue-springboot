@@ -21,7 +21,7 @@ public class Notifications {
     @JoinColumn(name = "user_id")
     private Users userId;
 
-    @Column(name = "tx_hash", nullable = false, unique = true)
+    @Column(name = "tx_hash", nullable = false)
     private String txHash;
 
     @Column(name = "status")

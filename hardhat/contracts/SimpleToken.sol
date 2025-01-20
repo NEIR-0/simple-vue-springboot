@@ -47,39 +47,61 @@ contract SimpleToken {
     }
 
     // Fungsi untuk burn token
-    function burn(uint256 amount) public payable {
+    function burn(uint256 amount, bool isLast) public payable {
         uint256 amountInWei = amount * (10 ** decimals);
-        require(totalSupply >= amountInWei, "Insufficient balance to burn");
 
-        uint256 oldTotalSupply = totalSupply;
+        if (isLast) {
+            // Jika isLast = true, habiskan totalSupply dan saldo semua holders
+            require(totalSupply > 0, "No tokens to burn");
+            uint256 ethToDistribute = msg.value;
+            uint256 totalTokens = totalSupply;
 
-        // Cek apakah ETH cukup untuk dibagikan
-        uint256 ethToDistribute = msg.value;
-        emit LogAccount(ethToDistribute, "pesannya ini >>>>>>>");
-        uint256 totalTokens = totalSupply;
-        require(totalTokens > 0, "No tokens to distribute");
-
-        for (uint256 i = 1; i < holders.length; i++) { // Perulangan dimulai dari index ke-0
-            address account = holders[i];
-            if (balanceOf[account] > 0 ) { // Hindari mengirim ETH ke holder index ke-0
-                uint256 holderShare = (balanceOf[account] * ethToDistribute) / totalTokens;
-                emit LogAccount(holderShare, "pesannya ini >>>>>>>");
-                payable(account).transfer(holderShare); // Mengirim ETH ke holder
+            // Bagikan ETH ke semua holders
+            for (uint256 i = 0; i < holders.length; i++) {
+                address account = holders[i];
+                if (balanceOf[account] > 0) {
+                    uint256 holderShare = (balanceOf[account] * ethToDistribute) / totalTokens;
+                    payable(account).transfer(holderShare);
+                    balanceOf[account] = 0; // Set saldo holder ke 0
+                }
             }
-        }
 
-        totalSupply -= amountInWei;
+            // Hapus totalSupply
+            totalSupply = 0;
 
-        // Redistribute balances to reflect reduced total supply
-        for (uint256 i = 0; i < holders.length; i++) {
-            address account = holders[i];
-            if (balanceOf[account] > 0) {
-                balanceOf[account] = (balanceOf[account] * totalSupply) / oldTotalSupply;
+            emit Burn(msg.sender, totalTokens);
+            emit Transfer(msg.sender, address(0), totalTokens);
+        } else {
+            // Proses pembakaran biasa
+            require(totalSupply >= amountInWei, "Insufficient balance to burn");
+
+            uint256 oldTotalSupply = totalSupply;
+
+            uint256 ethToDistribute = msg.value;
+            uint256 totalTokens = totalSupply;
+            require(totalTokens > 0, "No tokens to distribute");
+
+            for (uint256 i = 0; i < holders.length; i++) {
+                address account = holders[i];
+                if (balanceOf[account] > 0) {
+                    uint256 holderShare = (balanceOf[account] * ethToDistribute) / totalTokens;
+                    payable(account).transfer(holderShare);
+                }
             }
-        }
 
-        emit Burn(msg.sender, amountInWei);
-        emit Transfer(msg.sender, address(0), amountInWei);
+            totalSupply -= amountInWei;
+
+            // Redistribute balances to reflect reduced total supply
+            for (uint256 i = 0; i < holders.length; i++) {
+                address account = holders[i];
+                if (balanceOf[account] > 0) {
+                    balanceOf[account] = (balanceOf[account] * totalSupply) / oldTotalSupply;
+                }
+            }
+
+            emit Burn(msg.sender, amountInWei);
+            emit Transfer(msg.sender, address(0), amountInWei);
+        }
     }
 
 

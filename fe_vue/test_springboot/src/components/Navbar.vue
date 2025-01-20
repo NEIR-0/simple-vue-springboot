@@ -36,6 +36,11 @@ export default {
         console.log("ERROR: ", error);
       }
     },
+
+    getOrdinalWord(number) {
+      const ordinals = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
+      return ordinals[number - 1] || `${number}th`; // Mengembalikan "first", "second", dst. atau jika lebih dari 10, gunakan angka langsung
+    },
   },
   computed: {
     route() {
@@ -46,12 +51,8 @@ export default {
     this.dataNotif();
   },
   watch: {
-    'route.query.userId'(newUserId) {
-      if (newUserId) {
-        this.userId = newUserId;
-        console.log("Updated User ID:", this.userId);
+    'route.query.userId'() {
         this.dataNotif();
-      }
     },
   },
 };
@@ -80,7 +81,13 @@ export default {
       <div v-if="showNotif && notifications.length !== 0" class="w-1/3 max-h-[300px] bg-[#FBF5E5] shadow-md border-[1px] rounded-md absolute top-full right-0 flex flex-col items-center justify-start mt-5 overflow-y-scroll overflow-hidden">
         <div @click="updateReadNotif(notif?.id)" v-for="notif in notifications" class="w-full bg-white border-b-[1px] flex items-stretch justify-center flex-col p-5 space-y-3">
           <div class="w-full">
-            <h1>{{ notif?.status === "create_token" ? "Success Create New Token" : "" }} "{{notif?.token?.name}}"</h1>
+            <h1 class="capitalize">{{ 
+              notif?.status === "create_token" ? "Success Create New Token" : 
+              notif?.status === "minting_token" ? `Success Minting token on` :
+              notif?.status === "withdraw_token" ? `Success Withdrawing token on` :
+              notif?.status?.split("-")[0] === "burn_token" ? `Success ${getOrdinalWord(notif?.status.split("-")[1])} Burning on`
+              : "" }} "{{notif?.token?.name}}"
+            </h1>
           </div>
           <div class="w-full flex items-center justify-between">
             <p>status: {{notif?.token?.status}}</p>

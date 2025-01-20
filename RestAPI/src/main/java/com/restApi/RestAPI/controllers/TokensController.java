@@ -45,7 +45,10 @@ public class TokensController {
                         token.getTotalSupply(),
                         token.getAddressToken(),
                         token.getTotalBurn(),
-                        token.getAlreadyBurn()
+                        token.getAlreadyBurn(),
+                        token.getAmountPerBurning(),
+                        token.getPayPerBurn(),
+                        token.isWithdraw()
                 )
         ).toList();
 
@@ -74,7 +77,10 @@ public class TokensController {
                 token.get().getTotalSupply(),
                 token.get().getAddressToken(),
                 token.get().getTotalBurn(),
-                token.get().getAlreadyBurn()
+                token.get().getAlreadyBurn(),
+                token.get().getAmountPerBurning(),
+                token.get().getPayPerBurn(),
+                token.get().isWithdraw()
         );
     }
 
@@ -117,6 +123,21 @@ public class TokensController {
     ) {
         ResponseDTOOutput responseStatus = new ResponseDTOOutput();
         ResponseDTOOutput response =  tokensService.updateTokensBurn(tokenId);
+        if ("success".equals(response.getStatus())) {
+            return ResponseEntity.ok(response);
+        }else {
+            responseStatus.setMsg("failed due create token");
+            responseStatus.setStatus("failed");
+            return ResponseEntity.badRequest().body(responseStatus);
+        }
+    }
+
+    @PutMapping("/update-withdraw/{tokenId}")
+    public ResponseEntity<ResponseDTOOutput> updatewithdrawTokens(
+            @PathVariable Long tokenId
+    ) {
+        ResponseDTOOutput responseStatus = new ResponseDTOOutput();
+        ResponseDTOOutput response =  tokensService.updatewithdrawTokens(tokenId);
         if ("success".equals(response.getStatus())) {
             return ResponseEntity.ok(response);
         }else {

@@ -1,10 +1,14 @@
 package com.restApi.RestAPI.dto.tokenDTO;
 
+import jakarta.persistence.Column;
+
 public class UpdateTokenDTO {
     private int profitPersen;
     private String status;
     private int totalBurn;
     private double totalSupply;
+    private double payPerBurn;
+    private String burnTempo;
 
     // Getters and Setters
     public int getProfitPersen() {
@@ -13,6 +17,22 @@ public class UpdateTokenDTO {
 
     public void setProfitPersen(int profitPersen) {
         this.profitPersen = profitPersen;
+    }
+
+    public String getBurnTempo() {
+        return burnTempo;
+    }
+
+    public void setBurnTempo(String burnTempo) {
+        this.burnTempo = burnTempo;
+    }
+
+    public double getPayPerBurn() {
+        return payPerBurn;
+    }
+
+    public void setPayPerBurn(double payPerBurn) {
+        this.payPerBurn = payPerBurn;
     }
 
     public String getStatus() {

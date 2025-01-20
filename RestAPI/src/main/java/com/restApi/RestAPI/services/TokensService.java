@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Service
@@ -55,12 +57,11 @@ public class TokensService {
         List<Tokens> totalTokens;
 
         if (Objects.equals(userRole, "admin")) {
+            System.out.println("admin >>>??");
             tokensPage = tokensRepository.findAllTokens(pageable);
             totalTokens = tokensRepository.findAllTokensOrderByCreatedAtDesc();
         } else {
-            List<Sort.Order> orders = new ArrayList<>();
-            pageable = PageRequest.of(page, size, Sort.by(orders));
-
+            System.out.println("user >>>??");
             tokensPage = tokensRepository.findAllOngoingTokensWithSupply(pageable);
             totalTokens = tokensRepository.findAllOngoingTokensWithSupplyOrderByCreatedAtDesc();
         }
@@ -92,6 +93,7 @@ public class TokensService {
         token.setTotalSupply(inputUser.getTotalSupply());
         token.setTotalBurn(inputUser.getTotalBurn());
         token.setAlreadyBurn(inputUser.getAlreadyBurn());
+        token.setWithdraw(false);
         token.setApprove(inputUser.isApprove());
         token.setStatus(inputUser.getStatus());
         token.setProfitPersen(inputUser.getProfitPersen());
@@ -148,10 +150,59 @@ public class TokensService {
         existingToken.setStatus(inputUser.getStatus());
         existingToken.setTotalBurn(inputUser.getTotalBurn());
         existingToken.setTotalSupply(inputUser.getTotalSupply());
+        existingToken.setPayPerBurn(inputUser.getPayPerBurn());
+        existingToken.setBurnTempo(inputUser.getBurnTempo());
+        double totalSupply = inputUser.getTotalSupply();
+        int totalBurn = inputUser.getTotalBurn();
+        BigDecimal amountPerBurn = BigDecimal.valueOf(totalSupply)
+                .divide(BigDecimal.valueOf(totalBurn), 0, RoundingMode.DOWN);
+        existingToken.setAmountPerBurning(amountPerBurn.doubleValue());
 
-        tokensRepository.save(existingToken);
+        Calendar calendar = Calendar.getInstance();
+        if (inputUser.getBurnTempo().startsWith("Monthly")) {
+            calendar.add(Calendar.MONTH, 1);
+        } else if (inputUser.getBurnTempo().startsWith("Quarterly")) {
+            calendar.add(Calendar.MONTH, 3);
+        } else if (inputUser.getBurnTempo().startsWith("Half")) {
+            calendar.add(Calendar.MONTH, 6);
+        } else if (inputUser.getBurnTempo().startsWith("Yearly")) {
+            calendar.add(Calendar.YEAR, 1);
+        } else {
+            System.out.println("Invalid selection BURN DATE");
+        }
+        existingToken.setBurnDate(calendar.getTime());
 
-        responseStatus.setMsg("products updated successfully");
+        Optional<Notifications> latestNotif = notificationsRepository.findLatestByTokenId(existingToken.getId());
+        latestNotif.ifPresent(notification -> {
+            Notifications newNotif = new Notifications();
+            newNotif.setIsRead(false);
+            newNotif.setTxHash(notification.getTxHash());
+            newNotif.setStatus("burn_token-" + existingToken.getAlreadyBurn());
+
+            Optional<Users> user = userRepository.findById(notification.getUserId().getId());
+            if (user.isPresent()) {
+                System.out.println("User found: " + user.get().getId());
+                newNotif.setUserId(user.get());
+                responseStatus.setMsg("userId-" + user.get().getId());
+            } else {
+                System.out.println("User not found!");
+            }
+
+            Optional<Tokens> tokenData = tokensRepository.findById(notification.getToken().getId());
+            if (tokenData.isPresent()) {
+                System.out.println("token found: " + tokenData.get().getId());
+                newNotif.setToken(tokenData.get());
+                try {
+                    rabbitMQSenderService.sendMessageForNotif(newNotif);
+                    tokensRepository.save(existingToken);
+                } catch (JsonProcessingException e) {
+                    System.out.println("Error create notifications minting");
+                    throw new RuntimeException(e);
+                }
+            } else {
+                System.out.println("token not found!");
+            }
+        });
         responseStatus.setStatus("success");
         return responseStatus;
     }
@@ -162,12 +213,104 @@ public class TokensService {
         Tokens existingToken = tokensRepository.findById(tokenId)
                 .orElseThrow(() -> new RuntimeException("token not found"));
 
-        if(existingToken.getAlreadyBurn() != existingToken.getTotalBurn()){
+        if(existingToken.getTotalBurn() - existingToken.getAlreadyBurn()  != 0 ){
             existingToken.setAlreadyBurn(existingToken.getAlreadyBurn() + 1);
         }
-        tokensRepository.save(existingToken);
 
-        responseStatus.setMsg("products updated successfully");
+        if(existingToken.getTotalBurn() == existingToken.getAlreadyBurn() ){
+            existingToken.setStatus("close");
+        }
+
+        // Ambil burn date dan konversi ke Calendar
+        Calendar current = Calendar.getInstance();
+        current.setTime(existingToken.getBurnDate());
+        if (existingToken.getBurnTempo().startsWith("Monthly")) {
+            current.add(Calendar.MONTH, 1);  // Tambahkan 1 bulan
+        } else if (existingToken.getBurnTempo().startsWith("Quarterly")) {
+            current.add(Calendar.MONTH, 3);  // Tambahkan 3 bulan
+        } else if (existingToken.getBurnTempo().startsWith("Half")) {
+            current.add(Calendar.MONTH, 6);  // Tambahkan 6 bulan
+        } else if (existingToken.getBurnTempo().startsWith("Yearly")) {
+            current.add(Calendar.YEAR, 1);   // Tambahkan 1 tahun
+        } else {
+            System.out.println("Invalid selection for BURN DATE");
+        }
+        existingToken.setBurnDate(current.getTime());
+
+        Optional<Notifications> latestNotif = notificationsRepository.findLatestByTokenId(existingToken.getId());
+        latestNotif.ifPresent(notification -> {
+            Notifications newNotif = new Notifications();
+            newNotif.setIsRead(false);
+            newNotif.setTxHash(notification.getTxHash());
+            newNotif.setStatus("burn_token-" + existingToken.getAlreadyBurn());
+
+            Optional<Users> user = userRepository.findById(notification.getUserId().getId());
+            if (user.isPresent()) {
+                System.out.println("User found: " + user.get().getId());
+                newNotif.setUserId(user.get());
+                responseStatus.setMsg("userId-" + user.get().getId());
+            } else {
+                System.out.println("User not found!");
+            }
+
+            Optional<Tokens> tokenData = tokensRepository.findById(notification.getToken().getId());
+            if (tokenData.isPresent()) {
+                System.out.println("token found: " + tokenData.get().getId());
+                newNotif.setToken(tokenData.get());
+                try {
+                    rabbitMQSenderService.sendMessageForNotif(newNotif);
+                    tokensRepository.save(existingToken);
+                } catch (JsonProcessingException e) {
+                    System.out.println("Error create notifications minting");
+                    throw new RuntimeException(e);
+                }
+            } else {
+                System.out.println("token not found!");
+            }
+        });
+        responseStatus.setStatus("success");
+        return responseStatus;
+    }
+
+    public ResponseDTOOutput updatewithdrawTokens(Long tokenId) {
+        ResponseDTOOutput responseStatus = new ResponseDTOOutput();
+
+        Tokens existingToken = tokensRepository.findById(tokenId)
+                .orElseThrow(() -> new RuntimeException("token not found"));
+
+        existingToken.setWithdraw(true);
+
+        Optional<Notifications> latestNotif = notificationsRepository.findLatestByTokenId(existingToken.getId());
+        latestNotif.ifPresent(notification -> {
+            Notifications newNotif = new Notifications();
+            newNotif.setIsRead(false);
+            newNotif.setTxHash(notification.getTxHash());
+            newNotif.setStatus("withdraw_token");
+
+            Optional<Users> user = userRepository.findById(notification.getUserId().getId());
+            if (user.isPresent()) {
+                System.out.println("User found: " + user.get().getId());
+                newNotif.setUserId(user.get());
+                responseStatus.setMsg("userId-" + user.get().getId());
+            } else {
+                System.out.println("User not found!");
+            }
+
+            Optional<Tokens> tokenData = tokensRepository.findById(notification.getToken().getId());
+            if (tokenData.isPresent()) {
+                System.out.println("token found: " + tokenData.get().getId());
+                newNotif.setToken(tokenData.get());
+                try {
+                    rabbitMQSenderService.sendMessageForNotif(newNotif);
+                    tokensRepository.save(existingToken);
+                } catch (JsonProcessingException e) {
+                    System.out.println("Error create notifications minting");
+                    throw new RuntimeException(e);
+                }
+            } else {
+                System.out.println("token not found!");
+            }
+        });
         responseStatus.setStatus("success");
         return responseStatus;
     }
