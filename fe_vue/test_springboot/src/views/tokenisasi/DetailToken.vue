@@ -53,8 +53,8 @@
             </table>
 
             <div v-if="token && role === 'admin' && tempAddress === owner">
-                <div v-if="totalSupply <= 0" class="mt-4 flex items-center justify-center space-x-4">
-                    <div v-if="!isBurning" class="flex items-center justify-center space-x-4">
+                <div class="mt-4 flex items-center justify-center space-x-4">
+                    <div v-if="tokenDetail?.totalBurn == 0" class="flex items-center justify-center space-x-4">
                         <div class="mb-2">
                             <label for="mintAmount" class="block text-lg">Amount to Mint:</label>
                             <input v-model="mintAmount" type="number" class="p-2 border rounded" placeholder="Enter amount to mint" />
@@ -85,13 +85,13 @@
                         </div>
                     </div>
     
-                    <div class="flex items-center justify-center space-x-4">
-                        <div v-if="isBurning" class="mb-2">
-                            <h2 class="capitalize font-medium text-lg my-5">Total Burn Remains: {{ tokenDetail?.alreadyBurn }}</h2>
+                    <div v-if="tokenDetail?.totalBurn - tokenDetail?.alreadyBurn != 0" class="flex items-center justify-center space-x-4">
+                        <div class="mb-2">
+                            <h2 class="capitalize font-medium text-lg my-5">Total Burn Remains: {{ tokenDetail?.totalBurn - tokenDetail?.alreadyBurn }}</h2>
                             <label for="burnAmount" class="block text-lg">Amount to Burn:</label>
                             <input v-model="burnAmount" type="number" class="p-2 border rounded" placeholder="Enter amount to burn" />
                         </div>
-                        <div v-if="isBurning" class="mb-2">
+                        <div class="mb-2">
                             <h2 class="capitalize font-medium text-lg my-5">Total share profit:</h2>
                             <label for="burnAmount" class="block text-lg">Amount profit to pay:</label>
                             <input v-model="profitShare" type="number" class="p-2 border rounded" placeholder="Enter amount to burn" />
@@ -100,8 +100,8 @@
                 </div>
                 <div class="mt-4 flex items-center justify-center space-x-4">
                     <button v-if="tokenDetail?.status !== 'ongoing'" @click="showMinting" class="bg-green-500 text-white p-2 rounded">Mint Token</button>
-                    <button v-if="tokenDetail?.alreadyBurn !== tokenDetail?.totalBurn" @click="showburnging" class="bg-red-500 text-white p-2 rounded ml-2">Burn Token</button>
-                    <button v-if="userBalance > 0" @click="withdrawFunds" class="bg-blue-500 text-white p-2 rounded ml-2">Withdraw</button>
+                    <button v-if="tokenDetail?.alreadyBurn !== tokenDetail?.totalBurn" @click="showburning" class="bg-red-500 text-white p-2 rounded ml-2">Burn Token</button>
+                    <button v-if="tokenDetail?.status == 'ongoing' && !tokenDetail?.withdraw" @click="withdrawFunds" class="bg-blue-500 text-white p-2 rounded ml-2">Withdraw</button>
                 </div>
             </div>
 
@@ -159,7 +159,7 @@ export default {
             }
         },
 
-        showburnging() {
+        showburning() {
             this.isBurning = true
             this.mintAmount = "";
             this.persentaseProfit = null;
@@ -203,6 +203,15 @@ export default {
         },
 
         async mintToken() {
+            if(this.mintAmount < 100){
+                this.$toast.open({
+                    message: "Amount to Mint Must More Than 100",
+                    type: 'warning',
+                    duration: 3000,
+                    position: 'top-right'
+                });
+                return
+            }
             const contractAddress = this.$route.params.address;
 
             if (!this.mintAmount || this.mintAmount <= 0) {
@@ -217,14 +226,14 @@ export default {
                 await tx.wait();
                 this.status = `Minting successful! Transaction Hash: ${tx.hash}`;
                 if(tx){
-                    const payPerBurn = this.calculateProfitPerBurn(this.mintAmount, this.persentaseProfit, this.total_burn)
+                    const payPerBurn = this.calculateProfitPerBurn(this.mintAmount, this.persentaseProfit, this.total_burn, this.tokenDetail?.tokenPrice)
                     const body = {
                         profitPersen: this.persentaseProfit,
                         status: "ongoing",
                         totalBurn: this.total_burn,
-                        totalSupply: this.totalSupply / Math.pow(10, 18),
-                        payPerBurn,
-                        time_burn: this.time_burn
+                        totalSupply: this.mintAmount,
+                        payPerBurn: payPerBurn,
+                        burnTempo: this.time_burn
                     }
                     this.updateTokens(body)
                 }
@@ -234,9 +243,9 @@ export default {
                 this.status = "Error minting token!";
             }
         },
-        calculateProfitPerBurn(totalToken, profitPercentage, totalBurn) {
-            const totalProfit = totalToken * (profitPercentage / 100);
-            const profitPerBurn = totalProfit / totalBurn;
+        calculateProfitPerBurn(totalToken, profitPercentage, totalBurn, price) {
+            const totalProfit = totalToken * price * (profitPercentage / 100);
+            const profitPerBurn = Math.floor(totalProfit / totalBurn);
             return profitPerBurn;
         },
         async burnToken() {
@@ -250,9 +259,19 @@ export default {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, abi, signer);
-                const tx = await contract.burn(this.burnAmount, {
-                    value: ethers.utils.parseEther(String(this.profitShare)),
-                });
+                let tx;
+                if(this.tokenDetail?.totalBurn - this.tokenDetail?.alreadyBurn == 1){
+                    const lastCalculateRaw = this.tokenDetail?.totalSupply * this.tokenDetail?.tokenPrice * (this.tokenDetail?.profitPersen / 100) 
+                    const lastCalculate = lastCalculateRaw - this.profitShare * this.tokenDetail?.totalBurn
+                    const calculateLastProfitShare = this.profitShare + this.tokenDetail?.totalSupply + lastCalculate
+                    tx = await contract.burn(this.burnAmount, true, {
+                        value: ethers.utils.parseEther(String(calculateLastProfitShare)), // Ether dikirim melalui msg.value
+                    });
+                }else{
+                    tx = await contract.burn(this.burnAmount, false, {
+                        value: ethers.utils.parseEther(String(this.profitShare)),
+                    });
+                }
                 await tx.wait(); // Tunggu transaksi selesai
                 this.status = `Burning successful! Transaction Hash: ${tx.hash}`;
                 if(tx){
@@ -274,11 +293,31 @@ export default {
                 const contract = new ethers.Contract(contractAddress, abi, signer);
 
                 const tx = await contract.withdraw();
+                if(tx){
+                    this.updatewithdrawTokens()
+                }
                 await tx.wait(); // Tunggu transaksi selesai
                 this.status = `Withdrawal successful! Transaction Hash: ${tx.hash}`;
             } catch (error) {
                 console.error(error);
                 this.status = "Error withdrawing funds!";
+            }
+        },
+
+        async updatewithdrawTokens() {
+            try {
+                const tokenId = this.$route.params.id;
+                const endpoint = "/token/update-withdraw/" + tokenId                
+                const response = await apiMethods.putData(endpoint);
+                if (response) {
+                    const [title, userId] = response?.msg.split('-');
+                    this.$router.push("/token?userId="+userId);
+                }
+            } catch (error) {
+                console.error('Error send message data:', error);
+                if (error?.message === "Invalid or expired token") {
+                    this.$router.push('/login')
+                }
             }
         },
 
@@ -324,7 +363,11 @@ export default {
             try {
                 const tokenId = this.$route.params.id;
                 const endpoint = "/token/update/" + tokenId                
-                await apiMethods.putData(endpoint, body);
+                const response = await apiMethods.putData(endpoint, body);
+                if (response) {
+                    const [title, userId] = response?.msg.split('-');
+                    this.$router.push("/token?userId="+userId);
+                }
                 this.mintAmount = "";
                 this.persentaseProfit = null;
                 this.total_burn =  null;
@@ -341,7 +384,11 @@ export default {
                 this.total_burn = 0
                 const tokenId = this.$route.params.id;
                 const endpoint = "/token/update-burn/" + tokenId                
-                await apiMethods.putData(endpoint);
+                const response = await apiMethods.putData(endpoint);
+                if (response) {
+                    const [title, userId] = response?.msg.split('-');
+                    this.$router.push("/token?userId="+userId);
+                }
                 this.burnAmount = "";
                 this.fetchTokens();
             } catch (error) {
@@ -356,6 +403,8 @@ export default {
             try {
                 const tokenId = this.$route.params.id;
                 const response = await apiMethods.getData(`/token/${tokenId}`);
+                this.burnAmount = response?.amountPerBurning
+                this.profitShare = response?.payPerBurn
                 this.tokenDetail = response;
             } catch (error) {
                 console.error('Error send message data:', error);
