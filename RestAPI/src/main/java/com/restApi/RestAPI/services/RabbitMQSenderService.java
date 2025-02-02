@@ -2,6 +2,7 @@ package com.restApi.RestAPI.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.restApi.RestAPI.dto.tokenDTO.InvestorTokensDTO;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.model.message.Messages;
 import com.restApi.RestAPI.model.notification.Notifications;
@@ -64,5 +65,11 @@ public class RabbitMQSenderService {
         System.out.println("Notifications message sent to RabbitMQ: " + inputUser);
         String NotificationJson = objectMapper.writeValueAsString(inputUser);
         amqpTemplate.convertAndSend("myExchange", "notif.routing.key", NotificationJson);
+    }
+
+    public void sendMessageForInvestment(InvestorTokensDTO inputUser) throws JsonProcessingException {
+        System.out.println("Investor Tokens message sent to RabbitMQ: " + inputUser);
+        String NotificationJson = objectMapper.writeValueAsString(inputUser);
+        amqpTemplate.convertAndSend("myExchange", "invest.routing.key", NotificationJson);
     }
 }

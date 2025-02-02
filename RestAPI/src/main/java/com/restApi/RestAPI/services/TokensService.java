@@ -2,10 +2,13 @@ package com.restApi.RestAPI.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
+import com.restApi.RestAPI.dto.tokenDTO.BuyTokenDTO;
+import com.restApi.RestAPI.dto.tokenDTO.InvestorTokensDTO;
 import com.restApi.RestAPI.dto.tokenDTO.UpdateTokenDTO;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.model.notification.Notifications;
 import com.restApi.RestAPI.model.token.Tokens;
+import com.restApi.RestAPI.repository.InvestorsTokensRepository;
 import com.restApi.RestAPI.repository.NotificationsRepository;
 import com.restApi.RestAPI.repository.TokensRepository;
 import com.restApi.RestAPI.repository.UserRepository;
@@ -33,6 +36,9 @@ public class TokensService {
 
     @Autowired
     NotificationsRepository notificationsRepository;
+
+    @Autowired
+    InvestorsTokensRepository investorsTokensRepository;
 
     public Map<String, Object> getAllTokens(String userRole, String sort, String price, String profit, Integer page, Integer size) {
         String sortField = "createdAt";
@@ -140,6 +146,57 @@ public class TokensService {
         return responseStatus;
     }
 
+    public ResponseDTOOutput investTokens(BuyTokenDTO inputUser, Long tokenId, Long userId) {
+        ResponseDTOOutput responseStatus = new ResponseDTOOutput();
+
+        // Membuat transaksi baru di database
+        InvestorTokensDTO investors = new InvestorTokensDTO();
+        investors.setAddressInvestor(inputUser.getAddressInvestor());
+        investors.setHash(inputUser.getHash());
+        investors.setHoldToken(inputUser.getHoldToken());
+        investors.setHoldAfterBurn(inputUser.getHoldAfterBurn());
+        investors.setProfitBurn(inputUser.getProfitBurn());
+
+        //  notifications
+        Notifications notif = new Notifications();
+        notif.setIsRead(false);
+        notif.setTxHash(inputUser.getHash());
+        notif.setStatus("buy_token");
+
+        System.out.println("userId: " + userId + ">>>>>>>>>>>");
+        Optional<Users> user = userRepository.findById(userId);
+        if (user.isPresent()) {
+            System.out.println("User found: " + user.get().getId());
+            investors.setUsers(user.orElse(null));
+            notif.setUserId(user.orElse(null));
+        } else {
+            System.out.println("User not found!");
+        }
+
+        try {
+            // Mengirim transaksi ke RabbitMQ
+            Optional<Tokens> tokenData = tokensRepository.findById(tokenId);
+            if (tokenData.isPresent()) {
+                System.out.println("token found: " + tokenData.get().getId());
+                notif.setToken(tokenData.orElse(null));
+                rabbitMQSenderService.sendMessageForNotif(notif);
+                investors.setTokenId(tokenId);
+                rabbitMQSenderService.sendMessageForInvestment(investors);
+            } else {
+                System.out.println("token not found!");
+            }
+
+            responseStatus.setMsg("userId-" + userId);
+            responseStatus.setStatus("success");
+        } catch (JsonProcessingException e) {
+            System.out.println("Error RabbitMQ Transaction: " + e.getMessage());
+            responseStatus.setMsg("Failed to process transaction.");
+            responseStatus.setStatus("failed");
+        }
+
+        return responseStatus;
+    }
+
     public ResponseDTOOutput updateTokens(UpdateTokenDTO inputUser, Long tokenId) {
         ResponseDTOOutput responseStatus = new ResponseDTOOutput();
 
@@ -177,12 +234,12 @@ public class TokensService {
             Notifications newNotif = new Notifications();
             newNotif.setIsRead(false);
             newNotif.setTxHash(notification.getTxHash());
-            newNotif.setStatus("burn_token-" + existingToken.getAlreadyBurn());
+            newNotif.setStatus("minting_token");
 
             Optional<Users> user = userRepository.findById(notification.getUserId().getId());
             if (user.isPresent()) {
                 System.out.println("User found: " + user.get().getId());
-                newNotif.setUserId(user.get());
+                newNotif.setUserId(user.orElse(null));
                 responseStatus.setMsg("userId-" + user.get().getId());
             } else {
                 System.out.println("User not found!");
@@ -191,7 +248,7 @@ public class TokensService {
             Optional<Tokens> tokenData = tokensRepository.findById(notification.getToken().getId());
             if (tokenData.isPresent()) {
                 System.out.println("token found: " + tokenData.get().getId());
-                newNotif.setToken(tokenData.get());
+                newNotif.setToken(tokenData.orElse(null));
                 try {
                     rabbitMQSenderService.sendMessageForNotif(newNotif);
                     tokensRepository.save(existingToken);
@@ -247,32 +304,34 @@ public class TokensService {
             Optional<Users> user = userRepository.findById(notification.getUserId().getId());
             if (user.isPresent()) {
                 System.out.println("User found: " + user.get().getId());
-                newNotif.setUserId(user.get());
+                newNotif.setUserId(user.orElse(null));
                 responseStatus.setMsg("userId-" + user.get().getId());
             } else {
                 System.out.println("User not found!");
             }
 
             Optional<Tokens> tokenData = tokensRepository.findById(notification.getToken().getId());
-            if (tokenData.isPresent()) {
-                System.out.println("token found: " + tokenData.get().getId());
-                newNotif.setToken(tokenData.get());
-                try {
-                    rabbitMQSenderService.sendMessageForNotif(newNotif);
-                    tokensRepository.save(existingToken);
-                } catch (JsonProcessingException e) {
-                    System.out.println("Error create notifications minting");
-                    throw new RuntimeException(e);
-                }
-            } else {
-                System.out.println("token not found!");
-            }
+            tokensRepository.save(existingToken);
+
+//            if (tokenData.isPresent()) {
+//                System.out.println("token found: " + tokenData.get().getId());
+//                newNotif.setToken(tokenData.orElse(null));
+//                try {
+//                    rabbitMQSenderService.sendMessageForNotif(newNotif);
+//                    tokensRepository.save(existingToken);
+//                } catch (JsonProcessingException e) {
+//                    System.out.println("Error create notifications burn");
+//                    throw new RuntimeException(e);
+//                }
+//            } else {
+//                System.out.println("token not found!");
+//            }
         });
         responseStatus.setStatus("success");
         return responseStatus;
     }
 
-    public ResponseDTOOutput updatewithdrawTokens(Long tokenId) {
+    public ResponseDTOOutput updatewithdrawTokens(BuyTokenDTO inputUser, Long tokenId, Long userId) {
         ResponseDTOOutput responseStatus = new ResponseDTOOutput();
 
         Tokens existingToken = tokensRepository.findById(tokenId)
@@ -280,37 +339,34 @@ public class TokensService {
 
         existingToken.setWithdraw(true);
 
-        Optional<Notifications> latestNotif = notificationsRepository.findLatestByTokenId(existingToken.getId());
-        latestNotif.ifPresent(notification -> {
-            Notifications newNotif = new Notifications();
-            newNotif.setIsRead(false);
-            newNotif.setTxHash(notification.getTxHash());
-            newNotif.setStatus("withdraw_token");
+        Notifications newNotif = new Notifications();
+        newNotif.setIsRead(false);
+        newNotif.setTxHash(inputUser.getHash());
+        newNotif.setStatus("withdraw_token");
 
-            Optional<Users> user = userRepository.findById(notification.getUserId().getId());
-            if (user.isPresent()) {
-                System.out.println("User found: " + user.get().getId());
-                newNotif.setUserId(user.get());
-                responseStatus.setMsg("userId-" + user.get().getId());
-            } else {
-                System.out.println("User not found!");
-            }
+        Optional<Users> user = userRepository.findById(userId);
+        if (user.isPresent()) {
+            System.out.println("User found: " + user.get().getId());
+            newNotif.setUserId(user.orElse(null));
+            responseStatus.setMsg("userId-" + user.get().getId());
+        } else {
+            System.out.println("User not found!");
+        }
 
-            Optional<Tokens> tokenData = tokensRepository.findById(notification.getToken().getId());
-            if (tokenData.isPresent()) {
-                System.out.println("token found: " + tokenData.get().getId());
-                newNotif.setToken(tokenData.get());
-                try {
-                    rabbitMQSenderService.sendMessageForNotif(newNotif);
-                    tokensRepository.save(existingToken);
-                } catch (JsonProcessingException e) {
-                    System.out.println("Error create notifications minting");
-                    throw new RuntimeException(e);
-                }
-            } else {
-                System.out.println("token not found!");
+        Optional<Tokens> tokenData = tokensRepository.findById(existingToken.getId());
+        if (tokenData.isPresent()) {
+            System.out.println("token found: " + tokenData.get().getId());
+            newNotif.setToken(tokenData.orElse(null));
+            try {
+                rabbitMQSenderService.sendMessageForNotif(newNotif);
+                tokensRepository.save(existingToken);
+            } catch (JsonProcessingException e) {
+                System.out.println("Error create notifications withdraw");
+                throw new RuntimeException(e);
             }
-        });
+        } else {
+            System.out.println("token not found!");
+        }
         responseStatus.setStatus("success");
         return responseStatus;
     }

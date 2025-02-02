@@ -1,5 +1,7 @@
 package com.restApi.RestAPI.model.token;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.restApi.RestAPI.model.auth.Users;
 import jakarta.persistence.*;
 import java.util.Date;
 
@@ -13,22 +15,27 @@ public class InvestorTokens {
 
     @ManyToOne
     @JoinColumn(name = "token_id", nullable = false)
+    @JsonBackReference
     private Tokens token;
+
+    @Column(name = "hash", nullable = false)
+    private String hash;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users userid;
 
     @Column(name = "address_investor", nullable = false)
     private String addressInvestor;
 
     @Column(name = "hold_token", nullable = false)
-    private int holdToken;
+    private double holdToken;
 
     @Column(name = "hold_after_burn", nullable = false)
-    private int holdAfterBurn;
+    private double holdAfterBurn;
 
-    @Column(name = "profit_burn", nullable = false)
-    private int profitBurn;
-
-    @Column(name = "is_withdraw", nullable = false)
-    private boolean isWithdraw;
+    @Column(name = "profit_burn")
+    private double profitBurn;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -56,6 +63,22 @@ public class InvestorTokens {
         this.token = token;
     }
 
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public Users getUsers() {
+        return userid;
+    }
+
+    public void setUsers(Users userid) {
+        this.userid = userid;
+    }
+
     public String getAddressInvestor() {
         return addressInvestor;
     }
@@ -64,36 +87,28 @@ public class InvestorTokens {
         this.addressInvestor = addressInvestor;
     }
 
-    public int getHoldToken() {
+    public double getHoldToken() {
         return holdToken;
     }
 
-    public void setHoldToken(int holdToken) {
+    public void setHoldToken(double holdToken) {
         this.holdToken = holdToken;
     }
 
-    public int getHoldAfterBurn() {
+    public double getHoldAfterBurn() {
         return holdAfterBurn;
     }
 
-    public void setHoldAfterBurn(int holdAfterBurn) {
+    public void setHoldAfterBurn(double holdAfterBurn) {
         this.holdAfterBurn = holdAfterBurn;
     }
 
-    public int getProfitBurn() {
+    public double getProfitBurn() {
         return profitBurn;
     }
 
-    public void setProfitBurn(int profitBurn) {
+    public void setProfitBurn(double profitBurn) {
         this.profitBurn = profitBurn;
-    }
-
-    public boolean isWithdraw() {
-        return isWithdraw;
-    }
-
-    public void setWithdraw(boolean isWithdraw) {
-        this.isWithdraw = isWithdraw;
     }
 
     public Date getCreatedAt() {

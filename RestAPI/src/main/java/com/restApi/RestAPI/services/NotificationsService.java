@@ -1,8 +1,8 @@
 package com.restApi.RestAPI.services;
 
+import com.restApi.RestAPI.dto.NotificationDTO;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.model.notification.Notifications;
-import com.restApi.RestAPI.model.token.Tokens;
 import com.restApi.RestAPI.repository.NotificationsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class NotificationsService {
         return "Berhasil create notification";
     }
 
-    public List<Notifications> getAllUnreadNotifications(Long userId) {
+    public List<NotificationDTO> getAllUnreadNotifications(Long userId) {
         return notificationsRepository.getAllUnreadNotifications(userId);
     }
 

@@ -1,5 +1,6 @@
 package com.restApi.RestAPI.model.token;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.restApi.RestAPI.model.auth.Users;
 import jakarta.persistence.*;
@@ -50,13 +51,13 @@ public class Tokens {
     private Boolean isWithdraw;
 
     @Column(name = "token_price", nullable = false)
-    private int tokenPrice;
+    private String tokenPrice;
 
     @Column(name = "status", nullable = false)
     private String status;
 
     @Column(name = "profit_persen", nullable = false)
-    private int profitPersen;
+    private double profitPersen;
 
     @Column(name = "address_token", nullable = false)
     private String addressToken;
@@ -65,6 +66,7 @@ public class Tokens {
     private String burnTempo;
 
     @OneToMany(mappedBy = "token", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<InvestorTokens> investorTokens;
 
     @Column(name = "burn_date")
@@ -72,7 +74,7 @@ public class Tokens {
     private Date burnDate;
 
     @Column(name = "pay_per_burn")
-    private double payPerBurn;
+    private String payPerBurn;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -155,11 +157,11 @@ public class Tokens {
         this.amountPerBurning = amountPerBurning;
     }
 
-    public double getPayPerBurn() {
+    public String getPayPerBurn() {
         return payPerBurn;
     }
 
-    public void setPayPerBurn(double payPerBurn) {
+    public void setPayPerBurn(String payPerBurn) {
         this.payPerBurn = payPerBurn;
     }
 
@@ -195,11 +197,11 @@ public class Tokens {
         this.isApprove = isApprove;
     }
 
-    public int getTokenPrice() {
+    public String getTokenPrice() {
         return tokenPrice;
     }
 
-    public void setTokenPrice(int tokenPrice) {
+    public void setTokenPrice(String tokenPrice) {
         this.tokenPrice = tokenPrice;
     }
 
@@ -219,11 +221,11 @@ public class Tokens {
         this.addressToken = addressToken;
     }
 
-    public int getProfitPersen() {
+    public double getProfitPersen() {
         return profitPersen;
     }
 
-    public void setProfitPersen(int profitPersen) {
+    public void setProfitPersen(double profitPersen) {
         this.profitPersen = profitPersen;
     }
 

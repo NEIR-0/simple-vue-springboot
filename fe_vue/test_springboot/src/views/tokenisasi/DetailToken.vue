@@ -101,11 +101,12 @@
                 <div class="mt-4 flex items-center justify-center space-x-4">
                     <button v-if="tokenDetail?.status !== 'ongoing'" @click="showMinting" class="bg-green-500 text-white p-2 rounded">Mint Token</button>
                     <button v-if="tokenDetail?.alreadyBurn !== tokenDetail?.totalBurn" @click="showburning" class="bg-red-500 text-white p-2 rounded ml-2">Burn Token</button>
-                    <button v-if="tokenDetail?.status == 'ongoing' && !tokenDetail?.withdraw" @click="withdrawFunds" class="bg-blue-500 text-white p-2 rounded ml-2">Withdraw</button>
+                    <!-- <button v-if="tokenDetail?.status == 'ongoing' && !tokenDetail?.withdraw && contractBalance > 0" @click="withdrawFunds" class="bg-blue-500 text-white p-2 rounded ml-2">Withdraw</button> -->
+                    <button v-if="tokenDetail?.status == 'ongoing'" @click="withdrawFunds" class="bg-blue-500 text-white p-2 rounded ml-2">Withdraw</button>
                 </div>
             </div>
 
-            <div v-if="token && role !== 'admin' || tempAddress !== owner">
+            <div v-if="token && (role !== 'admin' || tempAddress !== owner) && tokenDetail?.status != 'close'">
                 <div class="mt-4 flex items-center justify-center space-x-4">
                     <input v-model="buyAmount" type="number" placeholder="Amount to Buy" class="p-2 border rounded"/>
                     <button @click="buyToken" class="bg-blue-500 text-white p-2 rounded ml-2">Buy Token</button>
@@ -147,7 +148,8 @@ export default {
             isWalletConnected: false,
             tempAddress: false,
             totalBurn: [1,2,3,4],
-            timeBurn: ["Monthly (per Month)", "Quarterly (per 3 month)", "Half Yearly (per 6 month)", "Yearly (per 12 month)"]
+            timeBurn: ["Monthly (per Month)", "Quarterly (per 3 month)", "Half Yearly (per 6 month)", "Yearly (per 12 month)"],
+            contractBalance: 0
         };
     },
     methods: {
@@ -188,6 +190,7 @@ export default {
                 const decimalCount = await contract.decimals();
                 const ownerAddress = await contract.owner();
                 const userBalance = await contract.balanceOf(signer.getAddress());
+                const contractBalance = await provider.getBalance(contract.address);
 
                 this.tokenName = name;
                 this.tokenSymbol = symbol;
@@ -196,6 +199,7 @@ export default {
                 this.tokenPrice = price.toString()
                 this.totalSupply = supply.toString()
                 this.userBalance = userBalance.toString();
+                this.contractBalance = contractBalance
             } catch (error) {
                 console.error(error);
                 this.status = "Error fetching contract data!";
@@ -244,9 +248,13 @@ export default {
             }
         },
         calculateProfitPerBurn(totalToken, profitPercentage, totalBurn, price) {
+            if (totalBurn === 0) {
+                throw new Error("totalBurn tidak boleh nol");
+            }
             const totalProfit = totalToken * price * (profitPercentage / 100);
-            const profitPerBurn = Math.floor(totalProfit / totalBurn);
-            return profitPerBurn;
+            const profitPerBurn = totalProfit / totalBurn; // Menghindari Math.floor
+            const formatFLoat = parseFloat(profitPerBurn.toFixed(6)); // Mengembalikan nilai dengan 6 angka desimal
+            return `${formatFLoat}`;
         },
         async burnToken() {
             const contractAddress = this.$route.params.address;
@@ -260,6 +268,7 @@ export default {
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, abi, signer);
                 let tx;
+                let amountBurnDb;
                 if(this.tokenDetail?.totalBurn - this.tokenDetail?.alreadyBurn == 1){
                     const lastCalculateRaw = this.tokenDetail?.totalSupply * this.tokenDetail?.tokenPrice * (this.tokenDetail?.profitPersen / 100) 
                     const lastCalculate = lastCalculateRaw - this.profitShare * this.tokenDetail?.totalBurn
@@ -267,14 +276,19 @@ export default {
                     tx = await contract.burn(this.burnAmount, true, {
                         value: ethers.utils.parseEther(String(calculateLastProfitShare)), // Ether dikirim melalui msg.value
                     });
+                    amountBurnDb = calculateLastProfitShare
                 }else{
                     tx = await contract.burn(this.burnAmount, false, {
                         value: ethers.utils.parseEther(String(this.profitShare)),
                     });
+                    amountBurnDb = this.profitShare
                 }
                 await tx.wait(); // Tunggu transaksi selesai
                 this.status = `Burning successful! Transaction Hash: ${tx.hash}`;
                 if(tx){
+                    const body = {
+                        amount: amountBurnDb
+                    }     
                     this.updateAfterBurn()
                 }
                 this.getContractData(); // Perbarui data token setelah burning
@@ -294,7 +308,10 @@ export default {
 
                 const tx = await contract.withdraw();
                 if(tx){
-                    this.updatewithdrawTokens()
+                    const body = {
+                        hash: tx.hash
+                    }
+                    this.updatewithdrawTokens(body)
                 }
                 await tx.wait(); // Tunggu transaksi selesai
                 this.status = `Withdrawal successful! Transaction Hash: ${tx.hash}`;
@@ -304,11 +321,11 @@ export default {
             }
         },
 
-        async updatewithdrawTokens() {
+        async updatewithdrawTokens(body) {
             try {
                 const tokenId = this.$route.params.id;
                 const endpoint = "/token/update-withdraw/" + tokenId                
-                const response = await apiMethods.putData(endpoint);
+                const response = await apiMethods.putData(endpoint, body);
                 if (response) {
                     const [title, userId] = response?.msg.split('-');
                     this.$router.push("/token?userId="+userId);
@@ -342,13 +359,24 @@ export default {
 
                 // Kirim transaksi dengan nilai Ether yang sesuai
                 const tx = await contract.buyToken(this.buyAmount, { value: totalCost });
-
                 // Tunggu transaksi selesai
                 await tx.wait();
+                this.getContractData();
+
+                const signerAddress = await signer.getAddress();
+                const userBalance = await contract.balanceOf(signer.getAddress());
+                let userBalanceCurrent = userBalance.toString();
+                if(tx){
+                    const body = {
+                        addressInvestor: signerAddress,
+                        holdToken: this.buyAmount,
+                        holdAfterBurn: ethers.utils.formatUnits(userBalanceCurrent, "ether"),
+                        hash: tx.hash
+                    }
+                    this.buyTokenCreateDb(body)
+                }
                 this.buyAmount = "",
-                // Status sukses
                 this.status = `Token purchase successful! Transaction Hash: ${tx.hash}`;
-                this.getContractData(); // Update data setelah pembelian
             } catch (error) {
                 if (error.code === "ACTION_REJECTED") {
                     this.status = "Transaction rejected by user!";
@@ -371,6 +399,24 @@ export default {
                 this.mintAmount = "";
                 this.persentaseProfit = null;
                 this.total_burn =  null;
+            } catch (error) {
+                console.error('Error send message data:', error);
+                if (error?.message === "Invalid or expired token") {
+                    this.$router.push('/login')
+                }
+            }
+        },
+
+        async buyTokenCreateDb(body) {
+            try {
+                const tokenId = this.$route.params.id;
+                const endpoint = "/token/invest-token/" + tokenId                
+                const response = await apiMethods.postData(endpoint, body);
+                if (response) {
+                    const [title, userId] = response?.msg.split('-');
+                    this.$router.push("/token?userId="+userId);
+                }
+                this.buyAmount = "";
             } catch (error) {
                 console.error('Error send message data:', error);
                 if (error?.message === "Invalid or expired token") {

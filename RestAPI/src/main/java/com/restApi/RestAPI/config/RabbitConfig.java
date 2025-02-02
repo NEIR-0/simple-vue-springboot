@@ -31,6 +31,10 @@ public class RabbitConfig {
     public Queue notifQueue() {
         return new Queue("notifQueue", true);
     }
+    @Bean
+    public Queue investQueue() {
+        return new Queue("investQueue", true);
+    }
 
     // Mendefinisikan Exchange
     @Bean
@@ -63,5 +67,10 @@ public class RabbitConfig {
     @Bean
     public Binding bindingNotifQueue(Queue notifQueue, TopicExchange exchange) {
         return BindingBuilder.bind(notifQueue).to(exchange).with("notif.routing.key");
+    }
+
+    @Bean
+    public Binding bindingInvestQueue(Queue investQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(investQueue).to(exchange).with("invest.routing.key");
     }
 }

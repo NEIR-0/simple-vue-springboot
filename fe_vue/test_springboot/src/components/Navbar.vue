@@ -72,7 +72,7 @@ export default {
       </div>
 
       <button @click="showNotif = !showNotif" v-if="route?.path.startsWith('/token')" class="w-10 h-full absolute top-0 right-0 flex items-center justify-center">
-        <div class="px-0.5 w-fit h-fit bg-red-500 absolute top-0 left-1">
+        <div v-if="notifications?.length > 0" class="px-0.5 w-fit h-fit bg-red-500 absolute top-0 left-1">
           <p class="text-sm text-white">{{notifications?.length}}</p>
         </div>
         <i class="ri-notification-3-fill text-xl text-white"></i>
@@ -85,13 +85,14 @@ export default {
               notif?.status === "create_token" ? "Success Create New Token" : 
               notif?.status === "minting_token" ? `Success Minting token on` :
               notif?.status === "withdraw_token" ? `Success Withdrawing token on` :
+              notif?.status === "buy_token" ? `Success BUYING token on` :
               notif?.status?.split("-")[0] === "burn_token" ? `Success ${getOrdinalWord(notif?.status.split("-")[1])} Burning on`
-              : "" }} "{{notif?.token?.name}}"
+              : "" }} "{{notif?.tokenName}}"
             </h1>
           </div>
           <div class="w-full flex items-center justify-between">
-            <p>status: {{notif?.token?.status}}</p>
-            <p>{{ notif?.token?.createdAt ? new Date(notif.token.createdAt).toLocaleDateString('id-ID') : 'Invalid Date' }}</p>
+            <p>status: {{notif?.tokenStatus}}</p>
+            <p>{{ notif?.createdAt ? new Date(notif?.createdAt).toLocaleDateString('id-ID') : 'Invalid Date' }}</p>
           </div>
         </div>
       </div>

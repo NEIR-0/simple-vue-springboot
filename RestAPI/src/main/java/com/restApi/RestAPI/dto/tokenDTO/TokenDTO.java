@@ -1,13 +1,10 @@
 package com.restApi.RestAPI.dto.tokenDTO;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-
 public class TokenDTO {
     private String name;
-    private int tokenPrice;
+    private String tokenPrice;
     private String symbol;
-    private int profitPersen;
+    private double profitPersen;
     private String status;
     private double totalSupply;
     private String addressToken;
@@ -15,11 +12,11 @@ public class TokenDTO {
     private int totalBurn;
     private int alreadyBurn;
     private double amountPerBurning;
-    private double payPerBurn;
+    private String payPerBurn;
     private boolean isWithdraw;
 
     // Constructor
-    public TokenDTO(Long id, String name, int tokenPrice, String symbol, int profitPersen, String status, double totalSupply, String addressToken, int totalBurn, int alreadyBurn, double amountPerBurning, double payPerBurn, boolean isWithdraw) {
+    public TokenDTO(Long id, String name, String tokenPrice, String symbol, double profitPersen, String status, double totalSupply, String addressToken, int totalBurn, int alreadyBurn, double amountPerBurning, String payPerBurn, boolean isWithdraw) {
         this.id = id;
         this.name = name;
         this.tokenPrice = tokenPrice;
@@ -60,11 +57,11 @@ public class TokenDTO {
         this.addressToken = addressToken;
     }
 
-    public int getTokenPrice() {
+    public String getTokenPrice() {
         return tokenPrice;
     }
 
-    public void setTokenPrice(int tokenPrice) {
+    public void setTokenPrice(String tokenPrice) {
         this.tokenPrice = tokenPrice;
     }
 
@@ -76,11 +73,11 @@ public class TokenDTO {
         this.totalBurn = totalBurn;
     }
 
-    public double getPayPerBurn() {
+    public String getPayPerBurn() {
         return payPerBurn;
     }
 
-    public void setPayPerBurn(double payPerBurn) {
+    public void setPayPerBurn(String payPerBurn) {
         this.payPerBurn = payPerBurn;
     }
 
@@ -92,11 +89,11 @@ public class TokenDTO {
         this.symbol = symbol;
     }
 
-    public int getProfitPersen() {
+    public double getProfitPersen() {
         return profitPersen;
     }
 
-    public void setProfitPersen(int profitPersen) {
+    public void setProfitPersen(double profitPersen) {
         this.profitPersen = profitPersen;
     }
 

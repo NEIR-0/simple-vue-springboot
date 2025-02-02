@@ -1,13 +1,11 @@
 package com.restApi.RestAPI.dto.tokenDTO;
 
-import jakarta.persistence.Column;
-
 public class UpdateTokenDTO {
     private int profitPersen;
     private String status;
     private int totalBurn;
     private double totalSupply;
-    private double payPerBurn;
+    private String payPerBurn;
     private String burnTempo;
 
     // Getters and Setters
@@ -27,11 +25,11 @@ public class UpdateTokenDTO {
         this.burnTempo = burnTempo;
     }
 
-    public double getPayPerBurn() {
+    public String getPayPerBurn() {
         return payPerBurn;
     }
 
-    public void setPayPerBurn(double payPerBurn) {
+    public void setPayPerBurn(String payPerBurn) {
         this.payPerBurn = payPerBurn;
     }
 
