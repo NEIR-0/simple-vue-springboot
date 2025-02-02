@@ -1,8 +1,7 @@
 package com.restApi.RestAPI.controllers;
 
+import com.restApi.RestAPI.dto.NotificationDTO;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
-import com.restApi.RestAPI.model.message.Messages;
-import com.restApi.RestAPI.model.notification.Notifications;
 import com.restApi.RestAPI.services.NotificationsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +25,10 @@ public class NotificationsController {
     NotificationsService notificationsService;
 
     @GetMapping("/unread")
-    public ResponseEntity<List<Notifications>> getAllUnreadNotifications(HttpServletRequest request) {
+    public ResponseEntity<List<NotificationDTO>> getAllUnreadNotifications(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         System.out.println("userId: " + userId + "??????");
-        List<Notifications> notifications = notificationsService.getAllUnreadNotifications(userId);
+        List<NotificationDTO> notifications = notificationsService.getAllUnreadNotifications(userId);
         if (notifications.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -53,7 +52,7 @@ public class NotificationsController {
 
     @MessageMapping("/responseNotifications")
     @SendTo("/topic/responseNotifications")
-    public List<Notifications> sendNotifications(@Payload Map<String, Object> payload) {
+    public List<NotificationDTO> sendNotifications(@Payload Map<String, Object> payload) {
         System.out.println("Payload received: " + payload);
         String userIdString = payload.get("userId").toString();
         Long userId = Long.valueOf(userIdString);

@@ -1,5 +1,6 @@
 package com.restApi.RestAPI.controllers;
 
+import com.restApi.RestAPI.dto.tokenDTO.BuyTokenDTO;
 import com.restApi.RestAPI.dto.tokenDTO.TokenDTO;
 import com.restApi.RestAPI.dto.outputDTO.ResponseDTOOutput;
 import com.restApi.RestAPI.dto.tokenDTO.UpdateTokenDTO;
@@ -101,6 +102,24 @@ public class TokensController {
         }
     }
 
+    @PostMapping("/invest-token/{tokenId}")
+    public ResponseEntity<ResponseDTOOutput> investTokens(
+            @RequestBody BuyTokenDTO inputUser,
+            @PathVariable Long tokenId,
+            HttpServletRequest request
+    ) {
+        ResponseDTOOutput responseStatus = new ResponseDTOOutput();
+        Long userId = (Long) request.getAttribute("userId");
+        ResponseDTOOutput response =  tokensService.investTokens(inputUser, tokenId, userId);
+        if ("success".equals(response.getStatus())) {
+            return ResponseEntity.ok(response);
+        }else {
+            responseStatus.setMsg("failed due create transactions");
+            responseStatus.setStatus("failed");
+            return ResponseEntity.badRequest().body(responseStatus);
+        }
+    }
+
     @PutMapping("/update/{tokenId}")
     public ResponseEntity<ResponseDTOOutput> UpdateTokens(
             @RequestBody UpdateTokenDTO updateTokenDTO,
@@ -134,10 +153,13 @@ public class TokensController {
 
     @PutMapping("/update-withdraw/{tokenId}")
     public ResponseEntity<ResponseDTOOutput> updatewithdrawTokens(
-            @PathVariable Long tokenId
+            @RequestBody BuyTokenDTO inputUser,
+            @PathVariable Long tokenId,
+            HttpServletRequest request
     ) {
         ResponseDTOOutput responseStatus = new ResponseDTOOutput();
-        ResponseDTOOutput response =  tokensService.updatewithdrawTokens(tokenId);
+        Long userId = (Long) request.getAttribute("userId");
+        ResponseDTOOutput response =  tokensService.updatewithdrawTokens(inputUser, tokenId, userId);
         if ("success".equals(response.getStatus())) {
             return ResponseEntity.ok(response);
         }else {
