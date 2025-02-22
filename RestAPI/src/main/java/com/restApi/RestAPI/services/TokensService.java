@@ -7,6 +7,7 @@ import com.restApi.RestAPI.dto.tokenDTO.InvestorTokensDTO;
 import com.restApi.RestAPI.dto.tokenDTO.UpdateTokenDTO;
 import com.restApi.RestAPI.model.auth.Users;
 import com.restApi.RestAPI.model.notification.Notifications;
+import com.restApi.RestAPI.model.token.InvestorTokens;
 import com.restApi.RestAPI.model.token.Tokens;
 import com.restApi.RestAPI.repository.InvestorsTokensRepository;
 import com.restApi.RestAPI.repository.NotificationsRepository;
@@ -294,39 +295,45 @@ public class TokensService {
         }
         existingToken.setBurnDate(current.getTime());
 
-        Optional<Notifications> latestNotif = notificationsRepository.findLatestByTokenId(existingToken.getId());
-        latestNotif.ifPresent(notification -> {
+        // Update token in repository
+        tokensRepository.save(existingToken);
+        System.out.println("Token updated: " + existingToken.getId());
+
+        // Get all investors of the token
+        List<InvestorTokens> investors = investorsTokensRepository.findByToken(existingToken);
+        System.out.println("Found " + investors.size() + " investors for token ID: " + tokenId);
+
+        // Loop through each investor and create notification
+        for (InvestorTokens investor : investors) {
             Notifications newNotif = new Notifications();
             newNotif.setIsRead(false);
-            newNotif.setTxHash(notification.getTxHash());
+            newNotif.setTxHash(investor.getHash());
             newNotif.setStatus("burn_token-" + existingToken.getAlreadyBurn());
 
-            Optional<Users> user = userRepository.findById(notification.getUserId().getId());
+            Optional<Users> user = userRepository.findById(investor.getUsers().getId());
             if (user.isPresent()) {
                 System.out.println("User found: " + user.get().getId());
-                newNotif.setUserId(user.orElse(null));
-                responseStatus.setMsg("userId-" + user.get().getId());
+                newNotif.setUserId(user.get());
             } else {
-                System.out.println("User not found!");
+                System.out.println("User not found for investor ID: " + investor.getId());
+                continue;  // Skip this iteration if user not found
             }
 
-            Optional<Tokens> tokenData = tokensRepository.findById(notification.getToken().getId());
-            tokensRepository.save(existingToken);
+            Optional<Tokens> tokenData = tokensRepository.findById(existingToken.getId());
+            if (tokenData.isPresent()) {
+                newNotif.setToken(tokenData.get());
+                try {
+                    rabbitMQSenderService.sendMessageForNotif(newNotif);
+                    System.out.println("Notification sent for investor ID: " + investor.getId());
+                } catch (JsonProcessingException e) {
+                    System.out.println("Error creating notification for investor ID: " + investor.getId());
+                    throw new RuntimeException(e);
+                }
+            } else {
+                System.out.println("Token not found for notification");
+            }
+        }
 
-//            if (tokenData.isPresent()) {
-//                System.out.println("token found: " + tokenData.get().getId());
-//                newNotif.setToken(tokenData.orElse(null));
-//                try {
-//                    rabbitMQSenderService.sendMessageForNotif(newNotif);
-//                    tokensRepository.save(existingToken);
-//                } catch (JsonProcessingException e) {
-//                    System.out.println("Error create notifications burn");
-//                    throw new RuntimeException(e);
-//                }
-//            } else {
-//                System.out.println("token not found!");
-//            }
-        });
         responseStatus.setStatus("success");
         return responseStatus;
     }
