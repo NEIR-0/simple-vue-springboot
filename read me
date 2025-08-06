@@ -29,3 +29,10 @@ pakai vscode
 - npx hardhat node
 - npx hardhat ignition deploy ./ignition/modules/SimpleSendEther.js --network localhost && npx hardhat ignition deploy ./ignition/modules/TransactionStorage.js --network localhost && npx hardhat ignition deploy ./ignition/modules/SimpleToken.js --network localhost (chain cuz local) 
 - npx hardhat ignition deploy ./ignition/modules/TransactionStorageTestSepolia.js --network sepolia (example)
+
+
+## CARA SET UP JAVA SPRING BOOT
+1. donwload java (project pakai java --v 17)
+2. download maven (karena project pakai maven bukan gradel)
+3. copas "application.properties.example" ke "application.properties". jangan lupa isi, soanya ini kayaj env
+4. jalan kan command "mvn clean install"
